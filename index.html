@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deimonas Suchanka | Engineering Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .project-card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px; /* Max width of modal */
+            max-height: 90vh; /* Max height of modal */
+            overflow-y: auto; /* Scroll if content overflows */
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280; /* Tailwind gray-500 */
+        }
+        .modal-close-btn:hover {
+            color: #1f2937; /* Tailwind gray-800 */
+        }
+        /* Spinner for loading state */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #0ea5e9; /* Sky-500 */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-md fixed w-full z-10 top-0">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <a href="#" class="text-xl font-bold text-sky-700 hover:text-sky-600">DS Portfolio</a>
+                </div>
+                <div class="hidden md:flex space-x-4">
+                    <a href="#about" class="text-slate-600 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                    <a href="#projects" class="text-slate-600 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium">Projects</a>
+                    <a href="#skills" class="text-slate-600 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium">Skills</a>
+                    <a href="#contact" class="text-slate-600 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-600 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <a href="#about" class="block text-slate-600 hover:bg-sky-50 hover:text-sky-600 px-3 py-2 text-sm font-medium">About</a>
+            <a href="#projects" class="block text-slate-600 hover:bg-sky-50 hover:text-sky-600 px-3 py-2 text-sm font-medium">Projects</a>
+            <a href="#skills" class="block text-slate-600 hover:bg-sky-50 hover:text-sky-600 px-3 py-2 text-sm font-medium">Skills</a>
+            <a href="#contact" class="block text-slate-600 hover:bg-sky-50 hover:text-sky-600 px-3 py-2 text-sm font-medium">Contact</a>
+        </div>
+    </nav>
+
+    <header class="bg-sky-700 text-white pt-24 pb-16 md:pt-32 md:pb-24">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Deimonas Suchanka</h1>
+            <p class="text-lg md:text-2xl text-sky-200 mb-8">Aspiring Systems Engineer | R&D and Process Optimization Specialist</p>
+            <a href="#projects" class="bg-white text-sky-700 font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-sky-100 transition duration-300">View My Work</a>
+        </div>
+    </header>
+
+    <section id="about" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-12">About Me</h2>
+            <div class="max-w-3xl mx-auto text-slate-700 text-lg leading-relaxed space-y-6">
+                <p>
+                    I am a 23-year-old professional with a background in European Studies from the University of Amsterdam and practical experience gained from military service in Lithuania. My career has taken me through diverse roles, from operating heavy machinery to assembly line work, culminating in my current position at Ventil Test Equipment BV.
+                </p>
+                <p>
+                    Initially hired as a Service Engineer, my role has organically evolved towards Research & Development. I've been deeply involved in writing in-depth systems analyses, proposing data-driven frameworks for Quality Assurance improvement, and developing operational manuals for key machinery. I am passionate about systems thinking, problem-solving, and contributing to innovative engineering solutions.
+                </p>
+                <p>
+                    My goal is to leverage my analytical skills and hands-on experience to transition into a dedicated Systems Engineering role, ideally within an innovative sector like the space industry. I am highly adaptable, a quick learner, and thrive in environments where I can contribute to meaningful technological advancements.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-16 md:py-24 bg-slate-100">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-16">Key Projects & Contributions</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <div class="project-card bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition duration-300 ease-in-out project-card-hover">
+                    <div>
+                        <h3 class="project-title text-xl font-semibold text-sky-700 mb-3">Pekos Clamping System: Engineering Analysis</h3>
+                        <div class="project-description text-slate-600 text-sm mb-4 space-y-2">
+                            <p>
+                                Conducted an in-depth engineering analysis to diagnose and resolve critical operational inconsistencies in the Pekos clamping system. Identified root causes related to gain margin issues and mechanical variances, leading to a data-driven optimization of force parameters and control logic.
+                            </p>
+                            <p>
+                                <strong>Impact:</strong> Improved force consistency by up to 350% on affected stations, restoring reliable operation and ensuring quality assurance for critical components.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        <a href="assets/pdf/IEEE_Pekos_Clamping_System__Engineering_Analysis-14.pdf" target="_blank" class="inline-block bg-sky-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">View Full Analysis (PDF)</a>
+                        <button class="ai-insights-btn mt-2 w-full md:w-auto inline-block bg-amber-500 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-amber-600 transition duration-300">✨ Get AI Insights</button>
+                    </div>
+                </div>
+
+                <div class="project-card bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition duration-300 ease-in-out project-card-hover">
+                    <div>
+                        <h3 class="project-title text-xl font-semibold text-sky-700 mb-3">Framework for Enhanced Performance Validation</h3>
+                        <div class="project-description text-slate-600 text-sm mb-4 space-y-2">
+                            <p>
+                                Authored a comprehensive proposal for a standardized framework to enhance performance validation and analysis of Ventil clamping systems. This framework introduces a tiered approach with objective metrics and acceptance criteria for data-driven QA.
+                            </p>
+                            <p>
+                                <strong>Impact:</strong> Aims to improve product quality, strengthen QA evidence, enable efficient troubleshooting, and build a knowledge base for continuous improvement, supporting Ventil's strategic goals.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        <a href="assets/pdf/Framework_for_Enhanced_Performance_Validation___Analysis_of_Ventil_Clamping_Systems.pdf" target="_blank" class="inline-block bg-sky-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">View Framework (PDF)</a>
+                        <button class="ai-insights-btn mt-2 w-full md:w-auto inline-block bg-amber-500 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-amber-600 transition duration-300">✨ Get AI Insights</button>
+                    </div>
+                </div>
+
+                <div class="project-card bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition duration-300 ease-in-out project-card-hover">
+                    <div>
+                        <h3 class="project-title text-xl font-semibold text-sky-700 mb-3">VCB-4S Operational Manual Development</h3>
+                        <div class="project-description text-slate-600 text-sm mb-4 space-y-2">
+                            <p>
+                                Developed a detailed operational manual for the VCB-4S machine line, one of Ventil's primary products. This involved understanding the machine's functionality, safety procedures, maintenance, and troubleshooting.
+                            </p>
+                             <p>
+                                <strong>Impact:</strong> Provides clear, concise, and accurate documentation for operators, enhancing safety, operational efficiency, and user understanding of the equipment.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        <a href="assets/pdf/Manual_VCB-4S_EN.pdf" target="_blank" class="inline-block bg-sky-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">View Manual Sample (PDF)</a>
+                        <button class="ai-insights-btn mt-2 w-full md:w-auto inline-block bg-amber-500 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-amber-600 transition duration-300">✨ Get AI Insights</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-16">Core Competencies</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 text-center">
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Systems Analysis</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Data-Driven QA</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Technical Writing</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Process Optimization</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Problem Solving</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">R&D Support</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Mechanical Aptitude</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Adaptability</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">English (Fluent)</h4></div>
+                    <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Lithuanian (Native)</h4></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-16 md:py-24 bg-sky-700 text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8">Get In Touch</h2>
+            <p class="text-sky-200 text-lg mb-8 max-w-xl mx-auto">
+                I'm actively seeking opportunities where I can apply my skills in systems engineering and analysis, particularly in innovative and challenging environments. If you have a project or role where my background could be a good fit, I'd love to hear from you.
+            </p>
+            <a href="mailto:your.email@example.com" class="bg-white text-sky-700 font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-sky-100 transition duration-300">
+                Email Me: your.email@example.com
+            </a>
+            <p class="mt-8 text-sky-300">
+                You can also find my projects on <a href="https://github.com/yourusername" target="_blank" class="font-semibold hover:underline">GitHub</a>.
+            </p>
+        </div>
+    </section>
+
+    <footer class="bg-slate-800 text-slate-400 py-8 text-center">
+        <div class="container mx-auto px-6">
+            <p>&copy; <span id="currentYear"></span> Deimonas Suchanka. All rights reserved.</p>
+            <p class="text-sm mt-1">Built with Tailwind CSS & GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <div id="aiInsightsModal" class="modal-overlay hidden">
+        <div class="modal-content relative">
+            <button id="modalCloseBtn" class="modal-close-btn">&times;</button>
+            <h3 id="modalTitle" class="text-2xl font-bold text-sky-700 mb-4">AI-Powered Project Insights</h3>
+            <div id="modalBody" class="text-slate-700 space-y-4">
+                <div class="loader"></div> </div>
+            <p class="mt-6 text-xs text-slate-500">
+                <em>AI-generated insights by Google Gemini. Please verify critical information.</em>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- Standard Menu & Footer Year ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (mobileMenu) mobileMenu.classList.add('hidden');
+            });
+        });
+        
+        const currentYearElement = document.getElementById('currentYear');
+        if (currentYearElement) {
+            currentYearElement.textContent = new Date().getFullYear();
+        }
+
+        // --- Gemini AI Insights Functionality ---
+        const aiInsightsModal = document.getElementById('aiInsightsModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const modalTitleElement = document.getElementById('modalTitle'); // To update with project title
+        const modalBody = document.getElementById('modalBody');
+        const aiInsightsButtons = document.querySelectorAll('.ai-insights-btn');
+
+        // Function to show the modal
+        function showModal() {
+            if (aiInsightsModal) aiInsightsModal.classList.remove('hidden');
+        }
+
+        // Function to hide the modal
+        function hideModal() {
+            if (aiInsightsModal) aiInsightsModal.classList.add('hidden');
+        }
+
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', hideModal);
+        }
+        // Close modal if overlay is clicked
+        if (aiInsightsModal) {
+            aiInsightsModal.addEventListener('click', (event) => {
+                if (event.target === aiInsightsModal) { // Check if click is on the overlay itself
+                    hideModal();
+                }
+            });
+        }
+
+
+        aiInsightsButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const projectCard = event.target.closest('.project-card');
+                if (!projectCard) return;
+
+                const projectTitleElement = projectCard.querySelector('.project-title');
+                const projectDescriptionElement = projectCard.querySelector('.project-description');
+
+                if (!projectTitleElement || !projectDescriptionElement) {
+                    console.error('Project title or description element not found.');
+                    modalBody.innerHTML = '<p class="text-red-500">Error: Could not find project details on the page.</p>';
+                    showModal();
+                    return;
+                }
+                
+                const projectTitle = projectTitleElement.innerText;
+                // Get all <p> tags within project-description and join their text
+                const descriptionParagraphs = Array.from(projectDescriptionElement.querySelectorAll('p'));
+                const projectDescription = descriptionParagraphs.map(p => p.innerText.trim()).join('\n\n');
+
+
+                if (modalTitleElement) modalTitleElement.innerText = `AI Insights: ${projectTitle}`;
+                modalBody.innerHTML = '<div class="loader"></div><p class="text-center text-slate-500">Generating insights with Gemini AI...</p>';
+                showModal();
+
+                // Construct the prompt for Gemini
+                const prompt = `You are an expert at analyzing project descriptions for a portfolio. For the project detailed below, provide the following information clearly and concisely:
+
+Project Title:
+${projectTitle}
+
+Project Description:
+${projectDescription}
+
+---
+
+AI-Generated Insights:
+
+1. Executive Summary (1-2 sentences):
+[Your summary here]
+
+2. Technical Breakdown (Simplified for Non-Engineers, 2-3 sentences):
+[Your explanation here]
+
+3. Key Skills Demonstrated (3-5 bullet points, use '*' for bullets):
+* [Skill 1]
+* [Skill 2]
+* [Skill 3]
+
+Please format your response exactly as shown above, replacing the bracketed content with your analysis. Ensure the output under 'AI-Generated Insights' is ready for direct display and uses Markdown-like formatting for lists (*).`;
+
+                try {
+                    let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                    const payload = { contents: chatHistory };
+                    // IMPORTANT: The API key should be an empty string.
+                    // The Canvas environment will handle API key injection for gemini-2.0-flash.
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('Gemini API Error:', errorData);
+                        throw new Error(`API request failed with status ${response.status}: ${errorData?.error?.message || 'Unknown error'}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    let generatedText = "Could not retrieve insights at this moment.";
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        generatedText = result.candidates[0].content.parts[0].text;
+                        
+                        // Basic formatting for display: replace newlines with <br> and format bullet points
+                        // This looks for the "AI-Generated Insights:" part and takes text after it.
+                        const insightsHeader = "AI-Generated Insights:";
+                        let insightsContent = generatedText.substring(generatedText.indexOf(insightsHeader) + insightsHeader.length).trim();
+                        
+                        insightsContent = insightsContent
+                            .replace(/\n\n/g, '<br><br>') // Preserve double newlines as paragraph breaks
+                            .replace(/\n\*(?!\*)/g, '<br>• ') // Handle bullet points like * item
+                            .replace(/\n/g, '<br>'); // Single newlines to <br>
+
+                        // Further refine list formatting
+                        insightsContent = insightsContent.replace(/<br>• /g, '</p><ul class="list-disc list-inside ml-4"><li class="mb-1">').replace(/(\* [^\n<]+)/g, '<li class="mb-1">$1</li>');
+                        // Wrap sections in paragraphs for better spacing, if not already part of a list
+                        insightsContent = insightsContent.split('<br><br>').map(paragraph => {
+                            if (paragraph.startsWith('<ul class="list-disc list-inside ml-4">')) {
+                                return paragraph + '</ul>'; // Close UL if it's the end of a paragraph block
+                            }
+                            return `<p>${paragraph}</p>`;
+                        }).join('');
+                        // Clean up potential empty paragraphs or multiple ul tags
+                        insightsContent = insightsContent.replace(/<p><\/p>/g, '').replace(/<\/ul><ul/g, '<ul');
+
+
+                        modalBody.innerHTML = insightsContent;
+
+                    } else {
+                         modalBody.innerHTML = '<p class="text-orange-600">Received an empty or unexpected response from the AI. Please try again.</p>';
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching AI insights:', error);
+                    modalBody.innerHTML = `<p class="text-red-500"><strong>Error:</strong> Could not fetch AI insights. ${error.message}. Please check the console for more details.</p>`;
+                }
+            });
+        });
+
+    </script>
+
+</body>
+</html>
