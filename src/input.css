@@ -6,4 +6,14 @@
   html {
     font-family: 'Roboto', 'Orbitron', system-ui, sans-serif;
   }
+
+  h1 {
+    font-family: 'Orbitron', 'Inter', 'Roboto', sans-serif !important;
+    font-size: 3rem !important;
+    font-weight: 900 !important;
+    margin-bottom: 1.25rem !important;
+    margin-top: 0 !important;
+    color: #fff !important;
+    text-shadow: 0 0 25px rgba(100, 255, 218, 0.5), 0 0 40px rgba(100, 255, 218, 0.3) !important;
+  }
 }

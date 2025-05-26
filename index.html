@@ -5,52 +5,14 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Deimonas Suchanka | Engineering Portfolio</title>
-    <link rel="stylesheet" href="/src/input.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'Roboto', 'sans-serif'],
-              orbitron: ['Orbitron', 'sans-serif'],
-            },
-            colors: {
-              'brand-deep-blue': '#0A192F',
-              'brand-dark-blue': '#1B2B3A', 
-              'brand-medium-blue': '#2A3F5F', 
-              'brand-cyan-accent': '#64FFDA',
-              'brand-light-blue-highlight': '#A2DFF7',
-              'brand-text-primary': '#E0E7FF', // Slightly bluish white for primary text
-              'brand-text-secondary': '#B0C4DE', // Lighter, softer blue-grey for secondary
-              'brand-sky': {
-                100: '#E0F2FE',
-                200: '#BAE6FD',
-                300: '#7DD3FC',
-                400: '#38BDF8',
-                500: '#0EA5E9',
-                600: '#0284C7',
-                700: '#0369A1',
-              }
-            },
-            animation: {
-              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-            },
-            keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-            },
-            boxShadow: {
-              'ethereal-glow-soft': '0 0 30px -10px rgba(100, 255, 218, 0.25)', // Softer glow
-              'card-professional': '0 5px 15px rgba(0, 0, 0, 0.2)', 
-              'card-professional-hover': '0 8px 25px rgba(0, 0, 0, 0.25)',
-            }
-          },
-        },
-      }
-    </script>
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Only load needed font weights, add display=swap for faster rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@700&display=swap" rel="stylesheet">
+    <!-- Performance meta tags -->
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
+    <meta name="theme-color" content="#0A192F">
     <style>
       ::-webkit-scrollbar {
         width: 8px;
@@ -89,6 +51,8 @@
         padding-bottom: 6px; 
         font-weight: 500; 
         color: #B0C4DE; /* brand-text-secondary for nav links */
+        user-select: none; /* Prevents text selection/caret on nav links */
+        caret-color: transparent; /* Hide caret on nav links */
       }
       .nav-link:hover {
         color: #E0F2FE; /* brand-sky-100 on hover */
@@ -112,6 +76,8 @@
         font-weight: 700; /* Bold */
         color: #E0F2FE; /* brand-sky-100 */
         letter-spacing: 0.02em;
+        user-select: none; /* Prevents text selection/caret on section titles */
+        caret-color: transparent; /* Hide caret on section titles */
       }
       .content-block { /* Common styling for content blocks like About text, Contact form container */
         background-color: rgba(17, 24, 39, 0.3); /* Using Tailwind's gray-900 with alpha, or a dark blue */
@@ -123,6 +89,21 @@
         font-family: 'Inter', sans-serif;
         font-weight: 600; /* Semibold */
         color: #E0F2FE; /* brand-sky-100 */
+        user-select: none; /* Prevents text selection/caret on project card titles */
+        caret-color: transparent; /* Hide caret on project card titles */
+      }
+      h1 {
+        font-family: 'Orbitron', 'Inter', 'Roboto', sans-serif;
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 1.25rem;
+        margin-top: 0;
+        color: #fff;
+        text-shadow: 0 0 25px rgba(100, 255, 218, 0.5), 0 0 40px rgba(100, 255, 218, 0.3);
+      }
+      /* Hide caret but allow selection for main content blocks and paragraphs */
+      .content-block, p, li, span, label {
+        caret-color: transparent;
       }
     </style>
   </head>
@@ -275,7 +256,15 @@
       <p class="text-xs mt-2 opacity-75">Built with Tailwind CSS, Three.js & Vite.</p>
     </footer>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.js" defer></script>
+    <!-- Defer galaxy animation for better performance -->
+    <script type="module">
+      window.addEventListener('DOMContentLoaded', () => {
+        requestIdleCallback(() => {
+          import('/src/js/galaxy-animation.js');
+        });
+      });
+    </script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const yearSpan = document.getElementById('year');

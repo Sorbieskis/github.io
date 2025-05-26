@@ -361,13 +361,24 @@ function onWindowResize() {
 
 function resizeRendererAndCamera() {
   if (!canvas || !renderer || !camera) return;
-  // Use the canvas's CSS pixel size (clientWidth/clientHeight)
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  renderer.setSize(width, height, false); // false: don't set style
+  // Use the hero section's bounding client rect for more accurate scaling
+  const heroSection = document.getElementById('hero');
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  if (heroSection) {
+    const rect = heroSection.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+  }
+  renderer.setSize(width, height, false);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   if (composer) composer.setSize(width, height);
+  // Also update the canvas style to match
+  if (canvas) {
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+  }
 }
 
 window.addEventListener('resize', resizeRendererAndCamera);
