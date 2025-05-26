@@ -100,6 +100,7 @@ const params = {
 let scene, camera, renderer, composer, clock;
 let galaxyGroup, particlesCore, particlesDisk, dustLaneParticles, backgroundStars;
 let cameraPath;
+let canvas;
 
 function setupCameraPaths(center) {
     const orbitRadius = 160;
@@ -358,6 +359,20 @@ function onWindowResize() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 }
 
+function resizeRendererAndCamera() {
+  if (!canvas || !renderer || !camera) return;
+  // Use the canvas's CSS pixel size (clientWidth/clientHeight)
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  renderer.setSize(width, height, false); // false: don't set style
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  if (composer) composer.setSize(width, height);
+}
+
+window.addEventListener('resize', resizeRendererAndCamera);
+
+// In your animate/render loop, before rendering:
 function animate() {
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
@@ -370,11 +385,9 @@ function animate() {
     const time = (elapsedTime * params.cameraAnimationSpeed) % 1;
     const cameraPosition = cameraPath.getPointAt(time);
     camera.position.copy(cameraPosition);
-    
-    // Ensure camera always looks at the galaxyGroup's current world position
-    // Since galaxyGroup is at (0, -10, 0) and doesn't move, this is fine.
-    // If galaxyGroup itself moved, we'd need to get its world position.
     camera.lookAt(galaxyGroup.position); 
+
+    resizeRendererAndCamera(); // Ensure correct size every frame (safe for hero section)
 
     if (params.bloomEnabled && composer) {
         composer.render(delta);
@@ -386,7 +399,7 @@ function animate() {
 function init() {
     clock = new THREE.Clock();
     scene = new THREE.Scene();
-    const canvas = document.getElementById('sombreroCanvas');
+    canvas = document.getElementById('sombreroCanvas');
     if (!canvas) {
         console.error('Canvas #sombreroCanvas not found!');
         return;
@@ -418,3 +431,5 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+
+export { init };

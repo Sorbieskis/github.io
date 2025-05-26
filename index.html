@@ -1,221 +1,311 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Deimonas Suchanka | Engineering Portfolio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "/assets/pdf/js/libs/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
-        }
-    }
+    <link rel="stylesheet" href="/src/input.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'Roboto', 'sans-serif'],
+              orbitron: ['Orbitron', 'sans-serif'],
+            },
+            colors: {
+              'brand-deep-blue': '#0A192F',
+              'brand-dark-blue': '#1B2B3A', 
+              'brand-medium-blue': '#2A3F5F', 
+              'brand-cyan-accent': '#64FFDA',
+              'brand-light-blue-highlight': '#A2DFF7',
+              'brand-text-primary': '#E0E7FF', // Slightly bluish white for primary text
+              'brand-text-secondary': '#B0C4DE', // Lighter, softer blue-grey for secondary
+              'brand-sky': {
+                100: '#E0F2FE',
+                200: '#BAE6FD',
+                300: '#7DD3FC',
+                400: '#38BDF8',
+                500: '#0EA5E9',
+                600: '#0284C7',
+                700: '#0369A1',
+              }
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+            },
+            boxShadow: {
+              'ethereal-glow-soft': '0 0 30px -10px rgba(100, 255, 218, 0.25)', // Softer glow
+              'card-professional': '0 5px 15px rgba(0, 0, 0, 0.2)', 
+              'card-professional-hover': '0 8px 25px rgba(0, 0, 0, 0.25)',
+            }
+          },
+        },
+      }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #020617;
-            color: #e2e8f0;
-        }
-        html { scroll-behavior: smooth; }
-        header.full-screen-hero {
-            position: relative;
-            overflow: hidden;
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #000000;
-        }
-        #sombreroCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-        main {
-            flex-grow: 1;
-            background-color: #f8fafc;
-            color: #1e293b;
-        }
-        nav.main-nav {
-            background-color: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-        }
-        nav.main-nav a { color: #cbd5e1; }
-        nav.main-nav a:hover { color: #ffffff; }
-        nav.main-nav .text-sky-700 { color: #7dd3fc; }
-        nav.main-nav .text-sky-700:hover { color: #e0f2fe; }
-        .project-card .project-title { color: #0f769e; }
-        .project-card .project-description { color: #334155; }
-        .project-card .bg-sky-600 { background-color: #0284c7; }
-        .project-card .hover\:bg-sky-700:hover { background-color: #0369a1; }
-        #skills h2 { color: #0f769e; }
-        #skills .bg-slate-100 { background-color: #f1f5f9; }
-        #skills .text-slate-700 { color: #334155; }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0A192F; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #0369A1; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #0EA5E9; 
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      /* CRITICAL FOR GALAXY ANIMATION: Ensure your JS correctly sizes the canvas! */
+      #sombreroCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.6; /* Further reduced opacity for subtlety */
+      }
+      .hero-content-container {
+        position: relative;
+        z-index: 10;
+        animation: fadeInUp 1s ease-out 0.2s; /* Added slight delay */
+        animation-fill-mode: backwards; /* Ensure it starts from opacity 0 */
+      }
+      .nav-link {
+        position: relative;
+        padding-bottom: 6px; 
+        font-weight: 500; 
+        color: #B0C4DE; /* brand-text-secondary for nav links */
+      }
+      .nav-link:hover {
+        color: #E0F2FE; /* brand-sky-100 on hover */
+      }
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: 2px;
+        background-color: #64FFDA; 
+        transition: width 0.3s ease-in-out;
+      }
+      .nav-link:hover::after,
+      .nav-link.active::after { /* JS needed to add 'active' class on scroll */
+        width: 100%;
+      }
+      .section-title-main { /* For main section titles like About, Projects */
+        font-family: 'Inter', sans-serif;
+        font-weight: 700; /* Bold */
+        color: #E0F2FE; /* brand-sky-100 */
+        letter-spacing: 0.02em;
+      }
+      .content-block { /* Common styling for content blocks like About text, Contact form container */
+        background-color: rgba(17, 24, 39, 0.3); /* Using Tailwind's gray-900 with alpha, or a dark blue */
+        border: 1px solid rgba(55, 65, 81, 0.4); /* Tailwind's gray-700 with alpha */
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 4px 10px -4px rgba(0,0,0,0.1); /* Softer, more diffused shadow */
+        backdrop-filter: blur(3px);
+      }
+      .project-card-title {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600; /* Semibold */
+        color: #E0F2FE; /* brand-sky-100 */
+      }
     </style>
-</head>
-<body>
-    <nav class="main-nav shadow-md fixed w-full z-20 top-0">
-        <div class="container mx-auto px-6 py-3">
-            <div class="flex items-center justify-between">
-                <div>
-                    <a href="#" class="text-xl font-bold text-sky-700 hover:text-sky-600">DS Portfolio</a>
-                </div>
-                <div class="hidden md:flex space-x-4">
-                    <a href="#about" class="px-3 py-2 rounded-md text-sm font-medium">About</a>
-                    <a href="#projects" class="px-3 py-2 rounded-md text-sm font-medium">Projects</a>
-                    <a href="#skills" class="px-3 py-2 rounded-md text-sm font-medium">Skills</a>
-                    <a href="#contact" class="px-3 py-2 rounded-md text-sm font-medium">Contact</a>
-                </div>
-                <div class="md:hidden">
-                    <button id="mobile-menu-button" class="hover:text-white focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    </button>
-                </div>
-            </div>
+  </head>
+  <body class="bg-brand-deep-blue text-brand-text-primary font-sans min-h-screen antialiased">
+    <header class="w-full py-4 bg-brand-deep-blue/80 backdrop-blur-md border-b border-brand-medium-blue/40 sticky top-0 z-50 shadow-2xl">
+      <nav class="flex justify-between items-center px-6 w-full max-w-none">
+        <div class="text-3xl font-orbitron font-bold tracking-wider text-white">
+          <a href="#hero">DS</a> 
         </div>
-        <div id="mobile-menu" class="md:hidden hidden bg-slate-800/90 shadow-lg">
-            <a href="#about" class="block hover:bg-slate-700 px-3 py-2 text-sm font-medium">About</a>
-            <a href="#projects" class="block hover:bg-slate-700 px-3 py-2 text-sm font-medium">Projects</a>
-            <a href="#skills" class="block hover:bg-slate-700 px-3 py-2 text-sm font-medium">Skills</a>
-            <a href="#contact" class="block hover:bg-slate-700 px-3 py-2 text-sm font-medium">Contact</a>
-        </div>
-    </nav>
-    <header class="full-screen-hero text-white">
-        <canvas id="sombreroCanvas"></canvas>
-        <div class="hero-content container mx-auto px-6 text-center">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4">Deimonas Suchanka</h1>
-            <p class="text-lg md:text-2xl text-sky-200 mb-8">Aspiring Systems Engineer | R&D and Process Optimization Specialist</p>
-            <a href="#projects" class="bg-white text-sky-700 font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-sky-100 transition duration-300 text-base md:text-lg">View My Work</a>
-        </div>
+        <ul class="flex space-x-8 text-sm">
+          <li><a href="#hero" class="nav-link transition-colors duration-300">Home</a></li>
+          <li><a href="#about" class="nav-link transition-colors duration-300">About</a></li>
+          <li><a href="#projects" class="nav-link transition-colors duration-300">Projects</a></li>
+          <li><a href="#skills" class="nav-link transition-colors duration-300">Skills</a></li>
+          <li><a href="#contact" class="nav-link transition-colors duration-300">Contact</a></li>
+        </ul>
+      </nav>
     </header>
+
     <main>
-        <section id="about" class="py-16 md:py-24 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-12">About Me</h2>
-                <div class="max-w-3xl mx-auto text-slate-700 text-lg leading-relaxed space-y-6">
-                    <p>
-                        I am a 23-year-old professional with a background in European Studies from the University of Amsterdam and practical experience gained from military service in Lithuania. My career has taken me through diverse roles, from operating heavy machinery to assembly line work, culminating in my current position at Ventil Test Equipment BV.
-                    </p>
-                    <p>
-                        Initially hired as a Service Engineer, my role has organically evolved towards Research & Development. I've been deeply involved in writing in-depth systems analyses, proposing data-driven frameworks for Quality Assurance improvement, and developing operational manuals for key machinery. I am passionate about systems thinking, problem-solving, and contributing to innovative engineering solutions.
-                    </p>
-                    <p>
-                        My goal is to leverage my analytical skills and hands-on experience to transition into a dedicated Systems Engineering role, ideally within an innovative sector like the space industry. I am highly adaptable, a quick learner, and thrive in environments where I can contribute to meaningful technological advancements.
-                    </p>
-                </div>
-            </div>
-        </section>
-        <section id="projects" class="py-16 md:py-24 bg-slate-100">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-16">Key Projects & Contributions</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="project-card bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition duration-300 ease-in-out project-card-hover">
-                        <div>
-                            <h3 class="project-title text-xl font-semibold text-sky-700 mb-3">Pekos Clamping System: Engineering Analysis</h3>
-                            <div class="project-description text-slate-600 text-sm mb-4 space-y-2">
-                                <p>
-                                    Conducted an in-depth engineering analysis to diagnose and resolve critical operational inconsistencies in the Pekos clamping system. Identified root causes related to gain margin issues and mechanical variances, leading to a data-driven optimization of force parameters and control logic.
-                                </p>
-                                <p>
-                                    <strong>Impact:</strong> Improved force consistency by up to 350% on affected stations, restoring reliable operation and ensuring quality assurance for critical components.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <a href="assets/pdf/IEEE_Pekos_Clamping_System__Engineering_Analysis-14.pdf" target="_blank" class="inline-block bg-sky-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">View Full Analysis (PDF)</a>
-                        </div>
-                    </div>
-                    <div class="project-card bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition duration-300 ease-in-out project-card-hover">
-                        <div>
-                            <h3 class="project-title text-xl font-semibold text-sky-700 mb-3">Framework for Enhanced Performance Validation</h3>
-                            <div class="project-description text-slate-600 text-sm mb-4 space-y-2">
-                                <p>
-                                    Authored a comprehensive proposal for a standardized framework to enhance performance validation and analysis of Ventil clamping systems. This framework introduces a tiered approach with objective metrics and acceptance criteria for data-driven QA.
-                                </p>
-                                <p>
-                                    <strong>Impact:</strong> Aims to improve product quality, strengthen QA evidence, enable efficient troubleshooting, and build a knowledge base for continuous improvement, supporting Ventil's strategic goals.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <a href="assets/pdf/Framework_for_Enhanced_Performance_Validation___Analysis_of_Ventil_Clamping_Systems.pdf" target="_blank" class="inline-block bg-sky-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">View Framework (PDF)</a>
-                        </div>
-                    </div>
-                    <div class="project-card bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition duration-300 ease-in-out project-card-hover">
-                        <div>
-                            <h3 class="project-title text-xl font-semibold text-sky-700 mb-3">VCB-4S Operational Manual Development</h3>
-                            <div class="project-description text-slate-600 text-sm mb-4 space-y-2">
-                                <p>
-                                    Developed a detailed operational manual for the VCB-4S machine line, one of Ventil's primary products. This involved understanding the machine's functionality, safety procedures, maintenance, and troubleshooting.
-                                </p>
-                                 <p>
-                                    <strong>Impact:</strong> Provides clear, concise, and accurate documentation for operators, enhancing safety, operational efficiency, and user understanding of the equipment.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <a href="assets/pdf/Manual_VCB-4S_EN.pdf" target="_blank" class="inline-block bg-sky-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-sky-700 transition duration-300">View Manual Sample (PDF)</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section id="skills" class="py-16 md:py-24 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl font-bold text-center text-sky-700 mb-16">Core Competencies</h2>
-                <div class="max-w-4xl mx-auto">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 text-center">
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Systems Analysis</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Data-Driven QA</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Technical Writing</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Process Optimization</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Problem Solving</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">R&D Support</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Mechanical Aptitude</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Adaptability</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">English (Fluent)</h4></div>
-                        <div class="bg-slate-100 p-4 rounded-lg shadow-sm"><h4 class="font-semibold text-slate-700">Lithuanian (Native)</h4></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section id="contact" class="py-16 md:py-24 bg-sky-700 text-white">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold mb-8">Get In Touch</h2>
-                <p class="text-sky-200 text-lg mb-8 max-w-xl mx-auto">
-                    I'm actively seeking opportunities where I can apply my skills in systems engineering and analysis, particularly in innovative and challenging environments. If you have a project or role where my background could be a good fit, I'd love to hear from you.
-                </p>
-                <a href="mailto:your.email@example.com" class="bg-white text-sky-700 font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-sky-100 transition duration-300">
-                    Email Me: your.email@example.com
-                </a>
-                <p class="mt-8 text-sky-300">
-                    You can also find my projects on <a href="https://github.com/yourusername" target="_blank" class="font-semibold hover:underline">GitHub</a>.
-                </p>
-            </div>
-        </section>
-    </main>
-    <footer class="bg-slate-800 text-slate-400 py-8 text-center">
-        <div class="container mx-auto px-6">
-            <p>&copy; <span id="currentYear"></span> Deimonas Suchanka. All rights reserved.</p>
-            <p class="text-sm mt-1">Built with Tailwind CSS, three.js & GitHub Pages.</p>
+      <section id="hero" class="relative flex flex-col items-center justify-center h-[100vh] w-full overflow-hidden pt-16">
+        <!-- 
+          IMPORTANT FOR GALAXY ANIMATION: 
+          The canvas below should fill this hero section. 
+          If it appears as a small square, the issue is LIKELY in your `js/galaxy-animation.js` file.
+          Ensure your Three.js renderer is being sized correctly:
+          1. `renderer.setSize(canvas.clientWidth, canvas.clientHeight);`
+          2. `camera.aspect = canvas.clientWidth / canvas.clientHeight;`
+          3. `camera.updateProjectionMatrix();`
+          These need to be called on initial load AND on window resize events.
+        -->
+        <canvas id="sombreroCanvas" class="absolute inset-0 w-full h-full z-0 opacity-60"></canvas>
+        <div class="hero-content-container flex flex-col items-center justify-center h-full w-full text-center px-4 py-12 md:py-24 relative z-10">
+          <h1 class="font-orbitron text-5xl md:text-7xl lg:text-8xl font-black mb-5 text-white" style="text-shadow: 0 0 25px rgba(100, 255, 218, 0.5), 0 0 40px rgba(100, 255, 218, 0.3);">
+            Deimonas Suchanka
+          </h1>
+          <p class="text-xl md:text-2xl text-brand-text-secondary mb-12 max-w-3xl" style="animation-delay: 0.5s;">
+            Aspiring Systems Engineer | R&D and Process Optimization Specialist
+          </p>
+          <a href="#projects" 
+             class="inline-block mt-4 px-10 py-4 bg-brand-cyan-accent text-brand-deep-blue text-base font-semibold rounded-md shadow-lg
+                    hover:bg-brand-light-blue-highlight hover:shadow-ethereal-glow-soft transform hover:scale-105 transition-all duration-300"
+             style="animation-delay: 0.8s;">
+            View My Work
+          </a>
         </div>
+      </section>
+
+      <section id="about" class="max-w-7xl mx-auto py-24 md:py-32 px-6 md:px-12">
+        <h2 class="section-title-main text-4xl md:text-5xl mb-16 text-center">About Me</h2>
+        <div class="max-w-3xl mx-auto text-lg text-brand-text-secondary leading-relaxed space-y-6 content-block p-8 md:p-12 rounded-xl">
+          <p>
+            I am a 23-year-old professional with a background in European Studies from the University of Amsterdam and practical experience gained from military service in Lithuania. My career has taken me through diverse roles, from operating heavy machinery to assembly line work, culminating in my current position at Ventil Test Equipment BV.
+          </p>
+          <p>
+            Initially hired as a Service Engineer, my role has organically evolved towards Research & Development. I've been deeply involved in writing in-depth systems analyses, proposing data-driven frameworks for Quality Assurance improvement, and developing operational manuals for key machinery. I am passionate about systems thinking, problem-solving, and contributing to innovative engineering solutions.
+          </p>
+          <p>
+            My goal is to leverage my analytical skills and hands-on experience to transition into a dedicated Systems Engineering role, ideally within an innovative sector like the space industry. I am highly adaptable, a quick learner, and thrive in environments where I can contribute to meaningful technological advancements.
+          </p>
+        </div>
+      </section>
+
+      <section id="projects" class="py-24 md:py-32 bg-brand-deep-blue/60 max-w-7xl mx-auto px-6 md:px-12">
+        <h2 class="section-title-main text-4xl md:text-5xl mb-20 text-center">Key Projects & Contributions</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
+          <div class="content-block rounded-xl p-6 md:p-8 flex flex-col transition-all duration-300 hover:shadow-card-professional-hover hover:border-brand-sky-500/80 group hover:-translate-y-1">
+            <h3 class="project-card-title text-xl md:text-2xl mb-4 group-hover:text-brand-light-blue-highlight transition-colors duration-300">Pekos Clamping System: Engineering Analysis</h3>
+            <p class="text-brand-text-secondary text-sm mb-4 leading-relaxed flex-grow">
+              Conducted an in-depth engineering analysis to diagnose and resolve critical operational inconsistencies in the Pekos clamping system. Identified root causes related to gain margin issues and mechanical variances...
+            </p>
+            <p class="text-brand-text-primary text-sm mb-6 font-medium">
+              <strong>Impact:</strong> Improved force consistency by up to 350%.
+            </p>
+            <a href="assets/pdf/IEEE_Pekos_Clamping_System__Engineering_Analysis-14.pdf" target="_blank" 
+               class="inline-block self-start mt-auto px-6 py-3 bg-brand-sky-700 text-white text-xs font-semibold rounded-md 
+                      hover:bg-brand-sky-600 transition-all duration-300 transform hover:scale-105">
+              View Full Analysis
+            </a>
+          </div>
+          <div class="content-block rounded-xl p-6 md:p-8 flex flex-col transition-all duration-300 hover:shadow-card-professional-hover hover:border-brand-sky-500/80 group hover:-translate-y-1">
+            <h3 class="project-card-title text-xl md:text-2xl mb-4 group-hover:text-brand-light-blue-highlight transition-colors duration-300">Framework for Enhanced Performance Validation</h3>
+            <p class="text-brand-text-secondary text-sm mb-4 leading-relaxed flex-grow">
+              Authored a comprehensive proposal for a standardized framework to enhance performance validation and analysis of Ventil clamping systems...
+            </p>
+             <p class="text-brand-text-primary text-sm mb-6 font-medium">
+              <strong>Impact:</strong> Aims to improve quality, QA evidence, and troubleshooting.
+            </p>
+            <a href="assets/pdf/Framework_for_Enhanced_Performance_Validation___Analysis_of_Ventil_Clamping_Systems.pdf" target="_blank" 
+               class="inline-block self-start mt-auto px-6 py-3 bg-brand-sky-700 text-white text-xs font-semibold rounded-md 
+                      hover:bg-brand-sky-600 transition-all duration-300 transform hover:scale-105">
+              View Framework
+            </a>
+          </div>
+          <div class="content-block rounded-xl p-6 md:p-8 flex flex-col transition-all duration-300 hover:shadow-card-professional-hover hover:border-brand-sky-500/80 group hover:-translate-y-1">
+            <h3 class="project-card-title text-xl md:text-2xl mb-4 group-hover:text-brand-light-blue-highlight transition-colors duration-300">VCB-4S Operational Manual Development</h3>
+            <p class="text-brand-text-secondary text-sm mb-4 leading-relaxed flex-grow">
+              Developed a detailed operational manual for the VCB-4S machine line, covering functionality, safety, maintenance, and troubleshooting...
+            </p>
+             <p class="text-brand-text-primary text-sm mb-6 font-medium">
+              <strong>Impact:</strong> Enhances safety and operational efficiency.
+            </p>
+            <a href="assets/pdf/Manual_VCB-4S_EN.pdf" target="_blank" 
+               class="inline-block self-start mt-auto px-6 py-3 bg-brand-sky-700 text-white text-xs font-semibold rounded-md 
+                      hover:bg-brand-sky-600 transition-all duration-300 transform hover:scale-105">
+              View Manual Sample
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="skills" class="max-w-7xl mx-auto py-24 md:py-32 px-6 md:px-12">
+        <h2 class="section-title-main text-4xl md:text-5xl mb-20 text-center">Core Competencies</h2>
+        <ul class="flex flex-wrap justify-center gap-x-4 gap-y-5 text-brand-text-primary">
+          <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">Systems Analysis</li>
+          <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">Data-Driven QA</li>
+          <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">Technical Writing</li>
+          <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">Process Optimization</li>
+          <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">Problem Solving</li>
+          <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">R&D Support</li>
+           <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">Three.js & WebGL</li>
+           <li class="bg-brand-medium-blue/60 px-6 py-3 text-sm font-medium rounded-md border border-brand-sky-700/50 hover:border-brand-sky-500 hover:text-brand-sky-100 transition-all duration-300 shadow-md hover:shadow-card-professional-hover cursor-default">JavaScript</li>
+        </ul>
+      </section>
+
+      <section id="contact" class="py-24 md:py-32 bg-brand-deep-blue/60 max-w-7xl mx-auto px-6 md:px-12">
+        <h2 class="section-title-main text-4xl md:text-5xl mb-16 text-center">Get In Touch</h2>
+        <div class="max-w-xl mx-auto content-block p-8 md:p-12 rounded-xl">
+          <p class="text-brand-text-secondary text-center mb-10 leading-relaxed">
+            I'm actively seeking opportunities where I can apply my skills in systems engineering and analysis. If you have a project or role where my background could be a good fit, I'd love to hear from you.
+          </p>
+          <form class="flex flex-col gap-6">
+            <input type="text" placeholder="Your Name" class="px-5 py-3.5 rounded-md bg-brand-deep-blue/80 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-cyan-accent border border-brand-medium-blue/80 placeholder-brand-text-secondary transition-all duration-300" />
+            <input type="email" placeholder="Your Email" class="px-5 py-3.5 rounded-md bg-brand-deep-blue/80 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-cyan-accent border border-brand-medium-blue/80 placeholder-brand-text-secondary transition-all duration-300" />
+            <textarea placeholder="Your Message" rows="5" class="px-5 py-3.5 rounded-md bg-brand-deep-blue/80 text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-cyan-accent border border-brand-medium-blue/80 placeholder-brand-text-secondary transition-all duration-300"></textarea>
+            <button type="submit" 
+                    class="bg-brand-cyan-accent hover:bg-brand-light-blue-highlight text-brand-deep-blue font-bold py-3.5 px-8 rounded-md transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+              Send Message
+            </button>
+          </form>
+          <p class="mt-10 text-center text-brand-text-secondary text-sm">
+              Or email me directly at: <a href="mailto:your.email@example.com" class="text-brand-sky-300 hover:text-brand-cyan-accent underline">your.email@example.com</a>
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="w-full py-12 bg-brand-deep-blue text-center text-neutral-500 border-t border-brand-medium-blue/30">
+      <p class="text-sm">&copy; <span id="year"></span> Deimonas Suchanka. All rights reserved.</p>
+      <p class="text-xs mt-2 opacity-75">Built with Tailwind CSS, Three.js & Vite.</p>
     </footer>
-    <script type="module" src="js/galaxy-animation.js"></script>
-</body>
+
+    <script type="module" src="/src/main.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const yearSpan = document.getElementById('year');
+        if (yearSpan) {
+          yearSpan.textContent = new Date().getFullYear();
+        }
+
+        // Smooth scroll with offset for fixed header
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href');
+            // Ensure it's a valid ID selector and not just "#" or an external link
+            if (targetId.length > 1 && targetId.startsWith('#')) {
+              const targetElement = document.querySelector(targetId);
+              if (targetElement) {
+                e.preventDefault();
+                const header = document.querySelector('header');
+                const headerOffset = header ? header.offsetHeight : 0;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 20; // 20px extra padding
+
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
