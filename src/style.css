@@ -94,6 +94,19 @@ button:focus-visible {
   opacity: 1;
 }
 
+#galaxy-accent {
+  position: fixed;
+  left: 0; top: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 60%, 
+    rgba(80,180,255,0.09) 0%, 
+    rgba(80,180,255,0.07) 18%,
+    rgba(80,180,255,0.00) 38%,
+    rgba(0,0,0,0.0) 100%
+  );
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

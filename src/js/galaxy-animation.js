@@ -46,13 +46,22 @@ const particleVertexShader = `
     attribute vec3 aColor;
     attribute float aRotationSpeed; 
     attribute float aDistanceFromCenter;
+    attribute float aTwinkleSpeed;
+    attribute float aFade; // <--- Add fade attribute
 
     varying vec3 vColor;
     varying float vParticleOpacityFactor;
+    varying float vFade;
 
     void main() {
         vColor = aColor;
-        vParticleOpacityFactor = 1.0; 
+        float twinkle = 1.0;
+        if (aTwinkleSpeed != 0.0) {
+            // Sparser but more visible twinkle
+            twinkle = 0.78 + 0.32 * sin(uTime * aTwinkleSpeed * 0.7 + aDistanceFromCenter * 0.1);
+        }
+        vParticleOpacityFactor = twinkle; // <--- Only twinkle, no fade here
+        vFade = aFade; // <--- Pass fade separately
 
         vec3 transformedPosition = position;
         float angle = uTime * aRotationSpeed * 0.035 + (aDistanceFromCenter * 0.00035); 
@@ -67,13 +76,14 @@ const particleVertexShader = `
 const particleFragmentShader = `
     varying vec3 vColor;
     varying float vParticleOpacityFactor;
+    varying float vFade;
     uniform float uParticleOpacity;
 
     void main() {
         float dist = distance(gl_PointCoord, vec2(0.5));
         float alpha = 1.0 - smoothstep(0.3, 0.5, dist); 
         if (alpha < 0.001) discard;
-        gl_FragColor = vec4(vColor, alpha * uParticleOpacity * vParticleOpacityFactor);
+        gl_FragColor = vec4(vColor, alpha * uParticleOpacity * vParticleOpacityFactor * vFade);
     }
 `;
 
@@ -188,19 +198,79 @@ function createGalaxyCore() {
     const rotationSpeeds = new Float32Array(particleCount);
     const distanceFromCenterAttr = new Float32Array(particleCount);
     const twinkleSpeeds = new Float32Array(particleCount); // For twinkle effect
+    const fadeAttr = new Float32Array(particleCount);
 
     const color1 = new THREE.Color(params.coreColor1);
     const color2 = new THREE.Color(params.coreColor2);
     const colorBright = new THREE.Color(params.coreColorBright);
     const coreRadius = params.coreRadius;
 
+    // --- Make the fade zone even wider and sharper for a cleaner black hole ---
+    // const horizonRadius = 3.2;
+    // const minBlackHoleRadius = horizonRadius * 1.18; // Slightly larger: no stars inside event horizon+disk
+    // const fadeZoneRadius = minBlackHoleRadius + 22.0; // MUCH wider fade zone for dramatic shadow
+    // let j = 0; // index for valid stars
+    // for (let i = 0; i < particleCount; i++) {
+    //     const r = Math.pow(Math.random(), 2.2) * coreRadius;
+    //     if (r < minBlackHoleRadius) continue; // Absolutely no stars inside event horizon+disk
+    //     let fade = 1.0;
+    //     if (r < fadeZoneRadius) {
+    //         fade = (r - minBlackHoleRadius) / (fadeZoneRadius - minBlackHoleRadius);
+    //         fade = Math.pow(fade, 4.0); // Even sharper fade (was 3.0)
+    //         if (fade < 0.10) fade = 0.0; // Harder cutoff
+    //     }
+    //     const theta = Math.random() * Math.PI * 2;
+    //     const phi = Math.acos((Math.random() * 2) - 1);
+    //     positions[j * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+    //     positions[j * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.5; 
+    //     positions[j * 3 + 2] = r * Math.cos(phi);
+
+    //     // --- More color and brightness variation ---
+    //     let pColor;
+    //     if (r < coreRadius * 0.18 && Math.random() < 0.15) {
+    //         // Supergiant: rare, very bright, slightly blue-white
+    //         pColor = colorBright.clone().lerp(new THREE.Color('#B0DCFF'), 0.3);
+    //         pColor.r *= 2.2 + Math.random() * 0.7;
+    //         pColor.g *= 2.0 + Math.random() * 0.5;
+    //         pColor.b *= 2.0 + Math.random() * 0.7;
+    //         sizes[j] = params.coreSize * 2.5 * (1.1 + Math.random() * 0.7);
+    //     } else if (r < coreRadius * 0.25) { 
+    //         pColor = colorBright.clone();
+    //         pColor.r *= (1.8 + Math.random() * 1.2); 
+    //         pColor.g *= (1.8 + Math.random() * 1.0);
+    //         pColor.b *= (1.5 + Math.random() * 0.7);
+    //         sizes[j] = params.coreSize * (1.5 + Math.random() * 0.7);
+    //     } else if (r < coreRadius * 0.65) { 
+    //         pColor = Math.random() > 0.3 ? color1.clone() : colorBright.clone().lerp(color1, 0.4);
+    //         pColor.lerp(color2, Math.random() * 0.2);
+    //         sizes[j] = params.coreSize * (1.1 + Math.random() * 0.5);
+    //     } else { 
+    //         pColor = Math.random() > 0.5 ? color1.clone() : color2.clone();
+    //         pColor.lerp(color2, Math.random() * 0.4);
+    //         sizes[j] = params.coreSize * (0.7 + Math.random() * 0.5);
+    //     }
+    //     // Add a bit more color variety
+    //     if (Math.random() < 0.08) pColor.lerp(new THREE.Color('#FFD6E0'), 0.3 + Math.random() * 0.3);
+    //     if (Math.random() < 0.08) pColor.lerp(new THREE.Color('#B0FFEA'), 0.3 + Math.random() * 0.3);
+    //     colors[j * 3 + 0] = pColor.r; colors[j * 3 + 1] = pColor.g; colors[j * 3 + 2] = pColor.b;
+    //     sizes[j] = Math.max(params.coreSize * 0.15, sizes[j]); 
+    //     rotationSpeeds[j] = (Math.random() - 0.5) * 0.07 + 0.025; 
+    //     distanceFromCenterAttr[j] = r;
+    //     // Twinkle: random speed, some don't twinkle
+    //     twinkleSpeeds[j] = Math.random() < 0.12 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0;
+    //     fadeAttr[j] = fade;
+    //     j++;
+    // }
+    // --- Instead, allow stars all the way to the center for a dense core ---
+    let j = 0;
     for (let i = 0; i < particleCount; i++) {
         const r = Math.pow(Math.random(), 2.2) * coreRadius;
+        let fade = 1.0;
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos((Math.random() * 2) - 1);
-        positions[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
-        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.5; 
-        positions[i * 3 + 2] = r * Math.cos(phi);
+        positions[j * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+        positions[j * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.5; 
+        positions[j * 3 + 2] = r * Math.cos(phi);
 
         // --- More color and brightness variation ---
         let pColor;
@@ -210,72 +280,50 @@ function createGalaxyCore() {
             pColor.r *= 2.2 + Math.random() * 0.7;
             pColor.g *= 2.0 + Math.random() * 0.5;
             pColor.b *= 2.0 + Math.random() * 0.7;
-            sizes[i] = params.coreSize * 2.5 * (1.1 + Math.random() * 0.7);
+            sizes[j] = params.coreSize * 2.5 * (1.1 + Math.random() * 0.7);
         } else if (r < coreRadius * 0.25) { 
             pColor = colorBright.clone();
             pColor.r *= (1.8 + Math.random() * 1.2); 
             pColor.g *= (1.8 + Math.random() * 1.0);
             pColor.b *= (1.5 + Math.random() * 0.7);
-            sizes[i] = params.coreSize * (1.5 + Math.random() * 0.7);
+            sizes[j] = params.coreSize * (1.5 + Math.random() * 0.7);
         } else if (r < coreRadius * 0.65) { 
             pColor = Math.random() > 0.3 ? color1.clone() : colorBright.clone().lerp(color1, 0.4);
             pColor.lerp(color2, Math.random() * 0.2);
-            sizes[i] = params.coreSize * (1.1 + Math.random() * 0.5);
+            sizes[j] = params.coreSize * (1.1 + Math.random() * 0.5);
         } else { 
             pColor = Math.random() > 0.5 ? color1.clone() : color2.clone();
             pColor.lerp(color2, Math.random() * 0.4);
-            sizes[i] = params.coreSize * (0.7 + Math.random() * 0.5);
+            sizes[j] = params.coreSize * (0.7 + Math.random() * 0.5);
         }
         // Add a bit more color variety
         if (Math.random() < 0.08) pColor.lerp(new THREE.Color('#FFD6E0'), 0.3 + Math.random() * 0.3);
         if (Math.random() < 0.08) pColor.lerp(new THREE.Color('#B0FFEA'), 0.3 + Math.random() * 0.3);
-        colors[i * 3 + 0] = pColor.r; colors[i * 3 + 1] = pColor.g; colors[i * 3 + 2] = pColor.b;
-        sizes[i] = Math.max(params.coreSize * 0.15, sizes[i]); 
-        rotationSpeeds[i] = (Math.random() - 0.5) * 0.07 + 0.025; 
-        distanceFromCenterAttr[i] = r;
+        colors[j * 3 + 0] = pColor.r; colors[j * 3 + 1] = pColor.g; colors[j * 3 + 2] = pColor.b;
+        sizes[j] = Math.max(params.coreSize * 0.15, sizes[j]); 
+        rotationSpeeds[j] = (Math.random() - 0.5) * 0.07 + 0.025; 
+        distanceFromCenterAttr[j] = r;
         // Twinkle: random speed, some don't twinkle
-        twinkleSpeeds[i] = Math.random() < 0.25 ? 0 : (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1);
+        twinkleSpeeds[j] = Math.random() < 0.12 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0;
+        fadeAttr[j] = fade;
+        j++;
     }
+    // Truncate arrays to actual number of valid stars
+    const finalCount = j;
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1)); 
-    geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1));
-    geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1));
-    geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1));
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions.slice(0, finalCount * 3), 3));
+    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors.slice(0, finalCount * 3), 3));
+    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes.slice(0, finalCount), 1)); 
+    geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds.slice(0, finalCount), 1));
+    geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr.slice(0, finalCount), 1));
+    geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds.slice(0, finalCount), 1));
+    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr.slice(0, finalCount), 1));
     const material = new THREE.ShaderMaterial({
         uniforms: {
             uTime: { value: 0.0 }, uSize: { value: params.particleBaseSize }, 
             uScale: { value: params.particlePerspectiveScale }, uParticleOpacity: { value: params.coreOpacity }
         },
-        vertexShader: `
-            uniform float uTime;
-            uniform float uSize;
-            uniform float uScale;
-            attribute float aSize;
-            attribute vec3 aColor;
-            attribute float aRotationSpeed;
-            attribute float aDistanceFromCenter;
-            attribute float aTwinkleSpeed;
-            varying vec3 vColor;
-            varying float vParticleOpacityFactor;
-            void main() {
-                vColor = aColor;
-                float twinkle = 1.0;
-                if (aTwinkleSpeed != 0.0) {
-                    // Subtle twinkle: lower amplitude, higher base, slightly slower
-                    twinkle = 0.85 + 0.18 * sin(uTime * aTwinkleSpeed * 0.7 + aDistanceFromCenter * 0.1);
-                }
-                vParticleOpacityFactor = twinkle;
-                vec3 transformedPosition = position;
-                float angle = uTime * aRotationSpeed * 0.035 + (aDistanceFromCenter * 0.00035); 
-                mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-                transformedPosition.xz = rotationMatrix * transformedPosition.xz;
-                vec4 mvPosition = modelViewMatrix * vec4(transformedPosition, 1.0);
-                gl_PointSize = aSize * uSize * (uScale / -mvPosition.z); 
-                gl_Position = projectionMatrix * mvPosition;
-            }
-        `,
+        vertexShader: particleVertexShader,
         fragmentShader: particleFragmentShader,
         blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
     });
@@ -292,6 +340,7 @@ function createGalaxyDisk() {
     const rotationSpeeds = new Float32Array(particleCount);
     const distanceFromCenterAttr = new Float32Array(particleCount);
     const twinkleSpeeds = new Float32Array(particleCount); // For twinkle effect
+    const fadeAttr = new Float32Array(particleCount).fill(1.0); // Disk: always 1.0
 
     const color1 = new THREE.Color(params.diskColor1);
     const color2 = new THREE.Color(params.diskColor2);
@@ -334,7 +383,7 @@ function createGalaxyDisk() {
         rotationSpeeds[i] = (0.3 - normalizedDistance * 0.28) * (0.6 + Math.random() * 0.7); 
         distanceFromCenterAttr[i] = r;
         // Twinkle: random speed, some don't twinkle
-        twinkleSpeeds[i] = Math.random() < 0.18 ? 0 : (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1);
+        twinkleSpeeds[i] = Math.random() < 0.12 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0;
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -343,39 +392,13 @@ function createGalaxyDisk() {
     geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1));
     geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1));
     geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1));
+    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1));
     const material = new THREE.ShaderMaterial({
         uniforms: {
             uTime: { value: 0.0 }, uSize: { value: params.particleBaseSize }, 
             uScale: { value: params.particlePerspectiveScale }, uParticleOpacity: { value: params.diskOpacity }
         },
-        vertexShader: `
-            uniform float uTime;
-            uniform float uSize;
-            uniform float uScale;
-            attribute float aSize;
-            attribute vec3 aColor;
-            attribute float aRotationSpeed;
-            attribute float aDistanceFromCenter;
-            attribute float aTwinkleSpeed;
-            varying vec3 vColor;
-            varying float vParticleOpacityFactor;
-            void main() {
-                vColor = aColor;
-                float twinkle = 1.0;
-                if (aTwinkleSpeed != 0.0) {
-                    // Subtle twinkle: lower amplitude, higher base, slightly slower
-                    twinkle = 0.85 + 0.18 * sin(uTime * aTwinkleSpeed * 0.7 + aDistanceFromCenter * 0.1);
-                }
-                vParticleOpacityFactor = twinkle;
-                vec3 transformedPosition = position;
-                float angle = uTime * aRotationSpeed * 0.035 + (aDistanceFromCenter * 0.00035); 
-                mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-                transformedPosition.xz = rotationMatrix * transformedPosition.xz;
-                vec4 mvPosition = modelViewMatrix * vec4(transformedPosition, 1.0);
-                gl_PointSize = aSize * uSize * (uScale / -mvPosition.z); 
-                gl_Position = projectionMatrix * mvPosition;
-            }
-        `,
+        vertexShader: particleVertexShader,
         fragmentShader: particleFragmentShader,
         blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
     });
@@ -391,6 +414,7 @@ function createDustLaneParticles() {
     const sizes = new Float32Array(particleCount);
     const rotationSpeeds = new Float32Array(particleCount);
     const distanceFromCenterAttr = new Float32Array(particleCount);
+    const fadeAttr = new Float32Array(particleCount).fill(1.0); // Dust: always 1.0
 
     const color1 = new THREE.Color(params.dustColor1);
     const color2 = new THREE.Color(params.dustColor2);
@@ -424,6 +448,7 @@ function createDustLaneParticles() {
     geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1)); 
     geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1));
     geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1));
+    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1));
     const material = new THREE.ShaderMaterial({
         uniforms: {
             uTime: { value: 0.0 }, uSize: { value: params.particleBaseSize }, 
@@ -443,6 +468,7 @@ function createBackgroundStars() {
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
     const sizes = new Float32Array(starCount);
+    const fadeAttr = new Float32Array(starCount).fill(1.0); // BG: always 1.0
     const colorWhite = new THREE.Color(0xffffff); const colorBlueish = new THREE.Color(0xb0b0ff);
 
     for (let i = 0; i < starCount; i++) {
@@ -465,6 +491,7 @@ function createBackgroundStars() {
     const dummyDistances = new Float32Array(starCount).fill(0);
     geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(dummyRotationSpeeds, 1));
     geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(dummyDistances, 1));
+    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1));
     const material = new THREE.ShaderMaterial({
         uniforms: {
             uTime: { value: 0.0 }, 
@@ -684,6 +711,7 @@ function init() {
     createGalaxyDisk();
     createDustLaneParticles();
     createBackgroundStars();
+    // addBlackHole(); // <--- Commented out: remove black hole and related visuals
     console.log("ALL Galaxy components creation RE-ENABLED.");
 
 
@@ -711,6 +739,113 @@ function init() {
     animate();
 }
 
+// After galaxyGroup = new THREE.Group();
+const textureLoader = new THREE.TextureLoader();
+textureLoader.load('https://threejs.org/examples/textures/sprites/glow.png', (glowTexture) => {
+    const glowMaterial = new THREE.SpriteMaterial({
+        map: glowTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        opacity: 0.22
+    });
+    const glowSprite = new THREE.Sprite(glowMaterial);
+    glowSprite.scale.set(60, 60, 1); // Adjust size as needed
+    glowSprite.position.set(0, 0, 0);
+    galaxyGroup.add(glowSprite);
+});
+
 document.addEventListener('DOMContentLoaded', init);
 window.scrollTo(0, 0); // Reset scroll on load
 export { init };
+
+// function addBlackHole() {
+//     // --- Event Horizon (black sphere) ---
+//     const horizonRadius = 3.2;
+//     const horizonGeometry = new THREE.SphereGeometry(horizonRadius, 32, 32);
+//     const horizonMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, depthWrite: true, depthTest: true });
+//     const eventHorizon = new THREE.Mesh(horizonGeometry, horizonMaterial);
+//     eventHorizon.position.set(0, 0, 0);
+//     eventHorizon.renderOrder = Infinity; // Absolutely last
+//     if (galaxyGroup.children.includes(eventHorizon)) galaxyGroup.remove(eventHorizon);
+//     galaxyGroup.add(eventHorizon);
+
+//     // --- Accretion Disk (glowing ring) ---
+//     const diskInner = horizonRadius * 1.15;
+//     const diskOuter = horizonRadius * 2.2;
+//     const accretionGeometry = new THREE.RingGeometry(diskInner, diskOuter, 128);
+//     const diskCanvas = document.createElement('canvas');
+//     diskCanvas.width = 256; diskCanvas.height = 256;
+//     const ctx = diskCanvas.getContext('2d');
+//     const grad = ctx.createRadialGradient(128,128,60,128,128,128);
+//     grad.addColorStop(0.0, 'rgba(255,255,255,0.85)');
+//     grad.addColorStop(0.25, 'rgba(255,220,120,0.55)');
+//     grad.addColorStop(0.55, 'rgba(80,180,255,0.18)');
+//     grad.addColorStop(0.85, 'rgba(0,0,0,0.0)');
+//     ctx.fillStyle = grad;
+//     ctx.beginPath();
+//     ctx.arc(128,128,128,0,Math.PI*2);
+//     ctx.fill();
+//     const diskTexture = new THREE.CanvasTexture(diskCanvas);
+//     diskTexture.wrapS = diskTexture.wrapT = THREE.ClampToEdgeWrapping;
+//     const accretionMaterial = new THREE.MeshBasicMaterial({ 
+//         map: diskTexture, 
+//         transparent: true, 
+//         side: THREE.DoubleSide, 
+//         depthWrite: false,
+//         depthTest: false, // Prevents hiding galaxy
+//         blending: THREE.AdditiveBlending
+//     });
+//     const accretionDisk = new THREE.Mesh(accretionGeometry, accretionMaterial);
+//     accretionDisk.position.set(0, 0, 0.1);
+//     accretionDisk.rotation.x = Math.PI / 2;
+//     accretionDisk.renderOrder = 999999;
+//     if (galaxyGroup.children.includes(accretionDisk)) galaxyGroup.remove(accretionDisk);
+//     galaxyGroup.add(accretionDisk);
+
+//     // --- Lensing/Accretion Ring (subtle, color-shifting) ---
+//     const lensingInner = diskOuter * 1.04;
+//     const lensingOuter = diskOuter * 1.19; // Make it wider for more visible lensing
+//     const lensingGeometry = new THREE.RingGeometry(lensingInner, lensingOuter, 256);
+//     // Custom canvas texture for lensing ring
+//     const lensingCanvas = document.createElement('canvas');
+//     lensingCanvas.width = 256; lensingCanvas.height = 32;
+//     const lctx = lensingCanvas.getContext('2d');
+//     // Colorful, subtle chromatic aberration effect
+//     const lgrad = lctx.createLinearGradient(0, 0, 256, 0);
+//     lgrad.addColorStop(0.0, 'rgba(120,180,255,0.12)');
+//     lgrad.addColorStop(0.18, 'rgba(255,255,255,0.22)');
+//     lgrad.addColorStop(0.32, 'rgba(255,220,120,0.18)');
+//     lgrad.addColorStop(0.5, 'rgba(255,255,255,0.28)');
+//     lgrad.addColorStop(0.68, 'rgba(255,120,220,0.18)');
+//     lgrad.addColorStop(0.82, 'rgba(255,255,255,0.22)');
+//     lgrad.addColorStop(1.0, 'rgba(120,180,255,0.12)');
+//     lctx.fillStyle = lgrad;
+//     lctx.fillRect(0, 0, 256, 32);
+//     const lensingTexture = new THREE.CanvasTexture(lensingCanvas);
+//     lensingTexture.wrapS = lensingTexture.wrapT = THREE.RepeatWrapping;
+//     lensingTexture.repeat.set(2, 1); // Subtle repeat for more detail
+//     const lensingMaterial = new THREE.MeshBasicMaterial({
+//         map: lensingTexture,
+//         transparent: true,
+//         side: THREE.DoubleSide,
+//         depthWrite: false,
+//         depthTest: false,
+//         blending: THREE.AdditiveBlending,
+//         opacity: 0.55 // More visible
+//     });
+//     const lensingRing = new THREE.Mesh(lensingGeometry, lensingMaterial);
+//     lensingRing.position.set(0, 0, 0.13);
+//     lensingRing.rotation.x = Math.PI / 2;
+//     lensingRing.renderOrder = 1000000;
+//     // Animate the lensing ring's color subtly for a premium effect
+//     function animateLensingRing() {
+//         const t = performance.now() * 0.00018;
+//         lensingMaterial.opacity = 0.38 + 0.18 * Math.sin(t * 1.2);
+//         lensingRing.material.color.setHSL(0.62 + 0.08 * Math.sin(t * 0.7), 0.7, 0.72 + 0.08 * Math.cos(t * 0.9));
+//         requestAnimationFrame(animateLensingRing);
+//     }
+//     animateLensingRing();
+//     if (galaxyGroup.children.includes(lensingRing)) galaxyGroup.remove(lensingRing);
+//     galaxyGroup.add(lensingRing);
+// }
