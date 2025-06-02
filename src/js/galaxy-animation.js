@@ -188,18 +188,17 @@ function onScroll() {
 
 
 // --- Camera Path: gentle, floaty Bezier curve ---
-let cameraCurve; // cameraStart, cameraMid, cameraEnd are no longer needed for QuadraticBezierCurve3
+let cameraCurve; 
 
 function setupCameraPath(center) {
-    // Define points for a sweeping CatmullRomCurve3 path
+    // Define points for a simpler, smoother CatmullRomCurve3 path
     const points = [
-        new THREE.Vector3(center.x + 40, center.y + 70, center.z + 280),   // Start further out, slightly adjusted from previous
-        new THREE.Vector3(center.x - 120, center.y + 50, center.z + 180),  // Sweep left and a bit closer
-        new THREE.Vector3(center.x, center.y - 60, center.z + 100),       // Optional: Sweep underneath or a different angle
-        new THREE.Vector3(center.x + 120, center.y + 30, center.z + 160),  // Sweep right
-        new THREE.Vector3(center.x, center.y + 5, center.z + 45)          // Final approach, close to center
+        new THREE.Vector3(center.x + 150, center.y + 40, center.z + 280), // Start wide right, slightly high
+        new THREE.Vector3(center.x, center.y + 20, center.z + 150),       // Move towards center, lower a bit
+        new THREE.Vector3(center.x - 150, center.y + 40, center.z + 280), // Sweep wide left, slightly high (symmetrical to start)
+        new THREE.Vector3(center.x, center.y + 10, center.z + 50)          // Final approach
     ];
-    cameraCurve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5); // closed = false, curveType, tension
+    cameraCurve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5); // Using default tension 0.5
 }
 
 function createGalaxyCore() { 
