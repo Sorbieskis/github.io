@@ -142,6 +142,8 @@ let galaxyGroup, particlesCore, particlesDisk, dustLaneParticles, backgroundStar
 let cameraPath; 
 let canvasElement; 
 let debugCube; 
+// --- Reusable vectors for performance ---
+let orbitOffset, orbitAxisX, orbitAxisY;
 
 // Scroll-related variables
 let scrollTarget = 0; // Normalized scroll position (0-1)
@@ -608,19 +610,10 @@ function animate() {
         // Camera position along the Bezier curve
         const camPos = cameraCurve.getPoint(easedScroll);
         camera.position.copy(camPos);
-        // --- Fix: Always update camera.lookAt after position update ---
-        camera.lookAt(galaxyGroup.position);
 
-        // --- Cinematic mouse orbit ONLY when zoomed in ---
-        const ORBIT_THRESHOLD = 0.15;
-        const TILT_THRESHOLD = 0.15;
-        const orbitFade = easedScroll > ORBIT_THRESHOLD ? Math.pow((easedScroll - ORBIT_THRESHOLD) / (1 - ORBIT_THRESHOLD), 2.5) : 0;
-        const tiltFade = easedScroll < (1 - TILT_THRESHOLD) ? 1 - Math.pow(easedScroll / (1 - TILT_THRESHOLD), 1.5) : 0;
-
-        // Reset all rotations by default
+        // Reset galaxy group rotation by default
         galaxyGroup.rotation.x = 0;
         galaxyGroup.rotation.y = 0;
-        camera.rotation.z = 0;
 
         if (easedScroll > 0.98) {
             // Cinematic orbit (camera offset/roll) and galaxy tilt ONLY when fully zoomed in
@@ -628,25 +621,36 @@ function animate() {
             const maxOrbitAngleY = Math.PI / 18;
             const orbitAngleX = mouseY * maxOrbitAngleX;
             const orbitAngleY = mouseX * maxOrbitAngleY;
-            // --- Fix: Orbit should be applied to a fresh offset from camPos, not from camera.position ---
-            const offset = new THREE.Vector3().subVectors(camPos, galaxyGroup.position);
-            offset.applyAxisAngle(new THREE.Vector3(1, 0, 0), orbitAngleX);
-            offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), orbitAngleY);
-            camera.position.copy(galaxyGroup.position).add(offset);
-            camera.lookAt(galaxyGroup.position);
-            camera.rotation.z = mouseX * 0.08;
+
+            // Use reusable vectors for orbit calculation
+            orbitOffset.subVectors(camPos, galaxyGroup.position);
+            orbitAxisX.set(1, 0, 0); 
+            orbitAxisY.set(0, 1, 0); 
+            orbitOffset.applyAxisAngle(orbitAxisX, orbitAngleX);
+            orbitOffset.applyAxisAngle(orbitAxisY, orbitAngleY);
+            camera.position.copy(galaxyGroup.position).add(orbitOffset);
+            
             // Galaxy tilt (optional, can be subtle)
             const maxTiltX = Math.PI / 20;
             const maxTiltY = Math.PI / 24;
             galaxyGroup.rotation.x = maxTiltX * mouseY;
             galaxyGroup.rotation.y = maxTiltY * mouseX;
         }
+        
         // FOV animation: widen as we zoom in
         camera.fov = params.cameraFov + 12 * easedScroll;
-        camera.updateProjectionMatrix();
+        camera.updateProjectionMatrix(); // Update projection matrix after FOV change
+
+        // Always look at the galaxy center
+        camera.lookAt(galaxyGroup.position);
+
+        // Apply roll effect AFTER the final lookAt, only if zoomed in
+        if (easedScroll > 0.98) {
+            camera.rotation.z = mouseX * 0.08;
+        } else {
+            camera.rotation.z = 0; // Ensure roll is reset otherwise
+        }
     }
-    // Camera always looks at the center of the galaxy
-    camera.lookAt(galaxyGroup.position);
 
     if (composer) {
         composer.render();
@@ -660,6 +664,11 @@ function init() {
     console.log("Starting init function (User's New Scroll Logic, No Rig)...");
     clock = new THREE.Clock(); 
     scene = new THREE.Scene();
+
+    // Initialize reusable vectors
+    orbitOffset = new THREE.Vector3();
+    orbitAxisX = new THREE.Vector3();
+    orbitAxisY = new THREE.Vector3();
     canvasElement = document.getElementById('sombreroCanvas');
 
     if (!canvasElement) {

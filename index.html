@@ -176,11 +176,6 @@
     </script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const yearSpan = document.getElementById('year');
-        if (yearSpan) {
-          yearSpan.textContent = new Date().getFullYear();
-        }
-
         // Smooth scroll with offset for fixed header
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
           anchor.addEventListener('click', function(e) {
