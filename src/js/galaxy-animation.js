@@ -152,27 +152,23 @@ let zoomTarget = 1;    // Target zoom factor (1 = no zoom, <1 = zoom in)
 let zoomCurrent = 1;   // Lerped zoom factor
 const LERP_FACTOR = 0.025; // Smoothing factor for scroll and zoom lerping
 
-// --- SCROLL MAPPING TO ABOUT SECTION ---
-let aboutSectionTop = null;
-function updateAboutSectionTop() {
-    const aboutSection = document.getElementById('about');
-    if (aboutSection) {
-        const rect = aboutSection.getBoundingClientRect();
-        aboutSectionTop = rect.top + window.scrollY;
-    } else {
-        aboutSectionTop = document.body.scrollHeight;
-    }
-}
+// --- SCROLL MAPPING FOR INTRO SECTION ---
+// The old aboutSectionTop logic is removed as scrollNorm is now based on the first viewport height.
 
 function onScroll() {
-    if (aboutSectionTop === null) updateAboutSectionTop();
+    // The camera animation (easedScroll 0 to 1) now maps to scrolling through the first viewport height.
+    const firstSectionHeight = window.innerHeight; 
     let scrollNorm = 0;
-    if (aboutSectionTop > 0) {
-        scrollNorm = Math.min(1, Math.max(0, window.scrollY / aboutSectionTop));
+    if (firstSectionHeight > 0) {
+        // Ensure scrollY doesn't exceed the height of the first section for this normalization
+        const currentScrollY = Math.min(window.scrollY, firstSectionHeight);
+        scrollNorm = Math.min(1, Math.max(0, currentScrollY / firstSectionHeight));
     }
-    scrollTarget = scrollNorm;
-    // To zoom IN as you scroll DOWN, zoomTarget should decrease from 1.
-    zoomTarget = Math.max(0.1, 1.0 - scrollNorm * 0.7);
+    scrollTarget = scrollNorm; // This is what drives `easedScroll` for the camera path
+    
+    // Zoom target can still be linked to this scrollNorm if the zoom is part of the intro animation
+    // This will make the camera zoom in as you scroll through the first section.
+    zoomTarget = Math.max(0.1, 1.0 - scrollNorm * 0.7); 
 }
 
 
@@ -548,7 +544,7 @@ function handleResize() {
         canvasElement.style.width = `${width}px`;
         canvasElement.style.height = `${height}px`;
     }
-    updateAboutSectionTop();
+    // updateAboutSectionTop(); // No longer needed here as scroll is viewport-based for intro
 
     if (composer) {
         composer.setSize(width, height);
@@ -675,17 +671,9 @@ function init() {
         console.error('CRITICAL: Canvas element with ID "sombreroCanvas" not found. Halting initialization.');
         return; 
     }
-    // Apply fixed, fullscreen background styling to canvas via JavaScript
-    canvasElement.style.display = "block";
-    canvasElement.style.position = "fixed";
-    canvasElement.style.left = "0";
-    canvasElement.style.top = "0";
-    canvasElement.style.width = "100vw";
-    canvasElement.style.height = "100vh";
-    canvasElement.style.zIndex = "-1"; // Ensure it's behind other page content
-    // canvasElement.style.background = "#000"; // Optional: set a bg color for canvas itself
-    console.log("Canvas element found and styled for fullscreen background.");
-
+    // Canvas styling is now handled by CSS (src/style.css: #sombreroCanvas { position: absolute; ... })
+    // This ensures it's correctly scoped within its parent section (#galaxy-intro).
+    console.log("Canvas element found. Styling will be handled by CSS.");
 
     renderer = new THREE.WebGLRenderer({ canvas: canvasElement, antialias: true, alpha: true });
     renderer.debug.checkShaderErrors = true; // Good for debugging shaders
@@ -728,9 +716,9 @@ function init() {
     setupPostProcessing();
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('DOMContentLoaded', updateAboutSectionTop);
-    window.addEventListener('load', updateAboutSectionTop);
-    onScroll();
+    // window.addEventListener('DOMContentLoaded', updateAboutSectionTop); // No longer needed
+    // window.addEventListener('load', updateAboutSectionTop); // No longer needed
+    onScroll(); // Call once to initialize scrollTarget based on initial scroll position
 
     // --- CAMERA HELPER (CRITICAL FOR DEBUGGING) ---
     // const helper = new THREE.CameraHelper( camera );

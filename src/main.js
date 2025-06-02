@@ -17,22 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
   let scrollIndicatorHidden = false;
 
   function updateUIBasedOnScroll() {
-    const easedScroll = window._easedScroll !== undefined ? window._easedScroll : (window.scrollY / (document.body.scrollHeight - window.innerHeight || 1));
+    const easedScroll = window._easedScroll !== undefined ? window._easedScroll : (window.scrollY / (window.innerHeight || 1)); // Fallback based on first VH
 
     // Scroll Indicator
-    if (easedScroll > 0.05 && !scrollIndicatorHidden) {
+    // Fades out after scrolling 50% of the intro section
+    if (easedScroll > 0.5 && !scrollIndicatorHidden) {
       scrollIndicator.classList.add('opacity-0');
       scrollIndicatorHidden = true;
-    } else if (easedScroll <= 0.05 && scrollIndicatorHidden) {
+    } else if (easedScroll <= 0.5 && scrollIndicatorHidden) {
       scrollIndicator.classList.remove('opacity-0');
       scrollIndicatorHidden = false;
     }
 
-    // Header and Hero Content
-    const fadeInStart = 0.1; // Start fading in
-    const fadeInEnd = 0.25;   // Fully faded in
+    // Header and Hero Content (from the *next* section)
+    // Start fading in when 80% of the intro section is scrolled
+    const fadeInTrigger = 0.8; 
 
-    if (easedScroll >= fadeInStart) {
+    if (easedScroll >= fadeInTrigger) {
       if (!headerVisible) {
         mainHeader.classList.remove('opacity-0');
         mainHeader.classList.add('opacity-100'); // Ensure it animates to full
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         heroMainContent.classList.add('opacity-100'); // Ensure it animates to full
         heroContentVisible = true;
       }
-    } else { // If scrolling back up before fadeInStart
+    } else { // If scrolling back up before the fadeInTrigger
       if (headerVisible) {
         mainHeader.classList.add('opacity-0');
         mainHeader.classList.remove('opacity-100');
@@ -59,7 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initial call to set states and start the loop
+  // Ensure elements are present before starting the loop
   if (mainHeader && heroMainContent && scrollIndicator) {
+     // Set initial states explicitly based on current scroll (usually 0 on load)
+    const initialEasedScroll = window._easedScroll !== undefined ? window._easedScroll : (window.scrollY / (window.innerHeight || 1));
+    if (initialEasedScroll <= 0.5) {
+        scrollIndicator.classList.remove('opacity-0');
+        scrollIndicatorHidden = false;
+    } else {
+        scrollIndicator.classList.add('opacity-0');
+        scrollIndicatorHidden = true;
+    }
+    // Header and hero content are already opacity-0 by class in HTML, so JS just needs to manage removing/adding it.
+    // The visible flags will be set correctly on the first run of updateUIBasedOnScroll.
+
     requestAnimationFrame(updateUIBasedOnScroll);
   } else {
     console.error('Required elements for scroll animation not found.');
