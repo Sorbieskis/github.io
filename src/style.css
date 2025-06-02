@@ -45,38 +45,32 @@ h1 {
 }
 
 /* Galaxy Animation Specific Styles */
+/* #sombreroCanvas styling is primarily handled by JS for fixed positioning and z-index */
+/* CSS can provide a fallback or base if needed, but JS will override for the global background effect. */
 #sombreroCanvas {
-  position: absolute; /* Changed from fixed to work within the relative hero section */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0; /* Behind hero content, but above hero background if any */
-  opacity: 0.6;
+  opacity: 0.6; /* Retain opacity control */
+  /* position, top, left, width, height, z-index are set by galaxy-animation.js */
 }
 
 #galaxy-vignette {
-  position: absolute; /* Changed from fixed to work within the relative hero section */
+  position: fixed; 
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1; /* Above canvas, below hero content */
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Above canvas, behind all content */
   pointer-events: none;
   background: radial-gradient(circle, rgba(10, 25, 47, 0) 60%, rgba(10, 25, 47, 0.8) 100%);
-  /* transition: opacity 0.4s; */ /* This was in the old src/style.css, check if needed */
-  /* opacity: 1; */ /* This was in the old src/style.css, check if needed */
 }
 
-/* This was in src/style.css, seems related to galaxy, keeping for now */
 #galaxy-accent {
-  position: absolute; /* Changed from fixed to absolute to be contained within the hero section */
+  position: fixed; 
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
-  z-index: 0; /* Same z-index as sombreroCanvas, order in DOM will matter or adjust if needed */
+  z-index: -1; /* Same level as vignette, or adjust if layering is specific */
   background: radial-gradient(circle at 50% 60%, 
     rgba(80,180,255,0.09) 0%, 
     rgba(80,180,255,0.07) 18%,
@@ -85,10 +79,20 @@ h1 {
   );
 }
 
+/* Scroll Indicator: Positioned fixed at the bottom center */
+#scroll-indicator {
+  position: fixed;
+  bottom: 2.5rem; /* Corresponds to Tailwind's bottom-10 */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20; /* Ensure it's above background elements */
+  /* Opacity transition is handled by Tailwind class in HTML */
+}
+
 /* Hero Section Specific */
 .hero-content-container {
-  position: relative;
-  z-index: 10; /* Ensures it's above the canvas and vignette */
+  position: relative; /* Stays relative for its own content stacking */
+  z-index: 10; /* Ensures it's above the global fixed backgrounds */
   animation: fadeInUp 1s ease-out 0.2s;
   animation-fill-mode: backwards;
 }

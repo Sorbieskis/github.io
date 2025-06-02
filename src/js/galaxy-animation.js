@@ -157,17 +157,19 @@ const LERP_FACTOR = 0.025; // Smoothing factor for scroll and zoom lerping
 
 function onScroll() {
     // The camera animation (easedScroll 0 to 1) now maps to scrolling through the first viewport height.
-    const firstSectionHeight = window.innerHeight; 
+    // This assumes the "intro" part of the animation completes within one full scroll of the viewport.
+    const firstViewportHeight = window.innerHeight; 
     let scrollNorm = 0;
-    if (firstSectionHeight > 0) {
-        // Ensure scrollY doesn't exceed the height of the first section for this normalization
-        const currentScrollY = Math.min(window.scrollY, firstSectionHeight);
-        scrollNorm = Math.min(1, Math.max(0, currentScrollY / firstSectionHeight));
+    if (firstViewportHeight > 0) {
+        // Consider scrollY up to the height of one viewport for the intro animation.
+        // Beyond that, scrollNorm would be > 1, but we cap it at 1 for the camera path.
+        const currentScrollY = window.scrollY; 
+        scrollNorm = Math.min(1, Math.max(0, currentScrollY / firstViewportHeight));
     }
     scrollTarget = scrollNorm; // This is what drives `easedScroll` for the camera path
     
     // Zoom target can still be linked to this scrollNorm if the zoom is part of the intro animation
-    // This will make the camera zoom in as you scroll through the first section.
+    // This will make the camera zoom in as you scroll through the first "page".
     zoomTarget = Math.max(0.1, 1.0 - scrollNorm * 0.7); 
 }
 
@@ -177,8 +179,8 @@ let cameraStart, cameraMid, cameraEnd;
 let cameraCurve;
 
 function setupCameraPath(center) {
-    // Start: a bit closer to the galaxy, still above and to the side
-    cameraStart = new THREE.Vector3(center.x + 60, center.y + 80, center.z + 220);
+    // Adjusted cameraStart for a slightly more direct initial view, less "tilted"
+    cameraStart = new THREE.Vector3(center.x + 20, center.y + 30, center.z + 230); 
     // Mid: closer, a bit above and to the other side
     cameraMid = new THREE.Vector3(center.x - 30, center.y + 40, center.z + 120);
     // End: close to the center, inside the galaxy
@@ -671,9 +673,15 @@ function init() {
         console.error('CRITICAL: Canvas element with ID "sombreroCanvas" not found. Halting initialization.');
         return; 
     }
-    // Canvas styling is now handled by CSS (src/style.css: #sombreroCanvas { position: absolute; ... })
-    // This ensures it's correctly scoped within its parent section (#galaxy-intro).
-    console.log("Canvas element found. Styling will be handled by CSS.");
+    // Style canvas via JS to ensure it's a fixed background for the whole page
+    canvasElement.style.display = "block";
+    canvasElement.style.position = "fixed";
+    canvasElement.style.left = "0";
+    canvasElement.style.top = "0";
+    canvasElement.style.width = "100vw";
+    canvasElement.style.height = "100vh";
+    canvasElement.style.zIndex = "-2"; // Ensure it's behind all other content, including vignette/accent
+    console.log("Canvas element found and styled as fixed background via JS.");
 
     renderer = new THREE.WebGLRenderer({ canvas: canvasElement, antialias: true, alpha: true });
     renderer.debug.checkShaderErrors = true; // Good for debugging shaders
