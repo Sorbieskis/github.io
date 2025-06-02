@@ -46,14 +46,7 @@
 
       <!-- This section now acts as the first scrollable content area, effectively the old hero -->
       <section id="hero-content-section" class="relative flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] w-full overflow-hidden pt-16"> 
-        <!-- pt-16 for header, min-h changed to ensure it takes space but can grow.
-             A 100vh spacer div could be added here if an empty scroll area before this content is desired. <!-- This comment is now less relevant due to the spacer above -->
-             However, the camera animation is tied to the first window.innerHeight of scroll.
-             So, this section should effectively be what's visible after scrolling 100vh.
-             To make it appear after a full 100vh scroll of "empty space" (just galaxy),
-             we might need an actual 100vh spacer div before this section.
-             For now, let's assume scrolling starts revealing this section's content gradually.
-        -->
+        <!-- Content below appears after the initial 100vh scroll (due to the spacer div above in <main>) -->
         <div id="hero-main-content" class="hero-content-container flex flex-col items-center justify-center h-full w-full text-center px-4 py-12 md:py-24 relative z-10 opacity-0 transition-opacity duration-1000 ease-in-out">
           <h1 class="font-orbitron text-5xl md:text-7xl lg:text-8xl font-black mb-5 text-white" style="text-shadow: 0 0 25px rgba(100, 255, 218, 0.5), 0 0 40px rgba(100, 255, 218, 0.3);">
             Deimonas Suchanka
