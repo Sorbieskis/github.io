@@ -152,41 +152,54 @@ let zoomTarget = 1;    // Target zoom factor (1 = no zoom, <1 = zoom in)
 let zoomCurrent = 1;   // Lerped zoom factor
 const LERP_FACTOR = 0.025; // Smoothing factor for scroll and zoom lerping
 
-// --- SCROLL MAPPING FOR INTRO SECTION ---
-// The old aboutSectionTop logic is removed as scrollNorm is now based on the first viewport height.
+// --- SCROLL MAPPING TO PROJECTS SECTION ---
+let projectsSectionTop = null;
+function updateProjectsSectionTop() {
+    const projectsSection = document.getElementById('projects');
+    if (projectsSection) {
+        const rect = projectsSection.getBoundingClientRect();
+        // Normalize scroll until the top of the projects section reaches the top of the viewport
+        projectsSectionTop = rect.top + window.scrollY;
+    } else {
+        // Fallback: if projects section isn't found, use a large enough value 
+        // to allow full scroll of typical page content.
+        projectsSectionTop = Math.max(document.body.scrollHeight - window.innerHeight, window.innerHeight * 3);
+    }
+}
 
 function onScroll() {
-    // The camera animation (easedScroll 0 to 1) now maps to scrolling through the first viewport height.
-    // This assumes the "intro" part of the animation completes within one full scroll of the viewport.
-    const firstViewportHeight = window.innerHeight; 
-    let scrollNorm = 0;
-    if (firstViewportHeight > 0) {
-        // Consider scrollY up to the height of one viewport for the intro animation.
-        // Beyond that, scrollNorm would be > 1, but we cap it at 1 for the camera path.
-        const currentScrollY = window.scrollY; 
-        scrollNorm = Math.min(1, Math.max(0, currentScrollY / firstViewportHeight));
+    if (projectsSectionTop === null) {
+        updateProjectsSectionTop(); // Calculate on first scroll if not already set by resize/load
     }
-    scrollTarget = scrollNorm; // This is what drives `easedScroll` for the camera path
     
-    // Zoom target can still be linked to this scrollNorm if the zoom is part of the intro animation
-    // This will make the camera zoom in as you scroll through the first "page".
-    zoomTarget = Math.max(0.1, 1.0 - scrollNorm * 0.7); 
+    let scrollNorm = 0;
+    if (projectsSectionTop > 0) {
+        // Normalize scroll from page top to the top of the projects section
+        scrollNorm = Math.min(1, Math.max(0, window.scrollY / projectsSectionTop));
+    }
+    scrollTarget = scrollNorm; // This drives _easedScroll for the camera path
+
+    // Zoom target is now linked to this new, longer scrollNorm.
+    // Adjust factor (e.g., 0.9) to control how quickly it zooms over this longer distance.
+    // A value of 1.0 would mean it's fully zoomed (target 0.1) when scrollNorm is 1.
+    // Max zoom factor of 0.1 means it zooms in to 10% of original distance/FOV effect.
+    zoomTarget = Math.max(0.1, 1.0 - scrollNorm * 0.9); 
 }
 
 
 // --- Camera Path: gentle, floaty Bezier curve ---
-let cameraStart, cameraMid, cameraEnd;
-let cameraCurve;
+let cameraCurve; // cameraStart, cameraMid, cameraEnd are no longer needed for QuadraticBezierCurve3
 
 function setupCameraPath(center) {
-    // Adjusted cameraStart for a slightly more direct initial view, less "tilted"
-    cameraStart = new THREE.Vector3(center.x + 20, center.y + 30, center.z + 230); 
-    // Mid: closer, a bit above and to the other side
-    cameraMid = new THREE.Vector3(center.x - 30, center.y + 40, center.z + 120);
-    // End: close to the center, inside the galaxy
-    cameraEnd = new THREE.Vector3(center.x, center.y, center.z + 40);
-    // Use a Quadratic Bezier curve for a gentle arc
-    cameraCurve = new THREE.QuadraticBezierCurve3(cameraStart, cameraMid, cameraEnd);
+    // Define points for a sweeping CatmullRomCurve3 path
+    const points = [
+        new THREE.Vector3(center.x + 40, center.y + 70, center.z + 280),   // Start further out, slightly adjusted from previous
+        new THREE.Vector3(center.x - 120, center.y + 50, center.z + 180),  // Sweep left and a bit closer
+        new THREE.Vector3(center.x, center.y - 60, center.z + 100),       // Optional: Sweep underneath or a different angle
+        new THREE.Vector3(center.x + 120, center.y + 30, center.z + 160),  // Sweep right
+        new THREE.Vector3(center.x, center.y + 5, center.z + 45)          // Final approach, close to center
+    ];
+    cameraCurve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5); // closed = false, curveType, tension
 }
 
 function createGalaxyCore() { 
@@ -546,7 +559,7 @@ function handleResize() {
         canvasElement.style.width = `${width}px`;
         canvasElement.style.height = `${height}px`;
     }
-    // updateAboutSectionTop(); // No longer needed here as scroll is viewport-based for intro
+    updateProjectsSectionTop(); // Recalculate on resize
 
     if (composer) {
         composer.setSize(width, height);
@@ -724,8 +737,11 @@ function init() {
     setupPostProcessing();
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', onScroll, { passive: true });
-    // window.addEventListener('DOMContentLoaded', updateAboutSectionTop); // No longer needed
-    // window.addEventListener('load', updateAboutSectionTop); // No longer needed
+    
+    // Ensure projectsSectionTop is calculated after DOM is ready and on load
+    window.addEventListener('DOMContentLoaded', updateProjectsSectionTop);
+    window.addEventListener('load', updateProjectsSectionTop);
+    
     onScroll(); // Call once to initialize scrollTarget based on initial scroll position
 
     // --- CAMERA HELPER (CRITICAL FOR DEBUGGING) ---
