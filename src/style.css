@@ -1,11 +1,27 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0A192F; /* brand-deep-blue */
+}
+::-webkit-scrollbar-thumb {
+  background: #0369A1; /* brand-sky-700 (example, adjust to match theme) */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0EA5E9; /* brand-sky-500 (example, adjust to match theme) */
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; /* Retaining base font from original src/style.css */
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
+  color-scheme: dark; /* Assuming a dark theme primarily */
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #0A192F; /* Match body background */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,92 +29,54 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Remove flex and place-items to prevent global centering/narrowing */
+  /* Tailwind handles body background and text color via classes on body tag */
 }
 
+/* Global H1 styles (consolidated) */
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-family: 'Orbitron', 'Inter', 'Roboto', sans-serif;
+  /* Font size, weight, margins are handled by Tailwind classes on the h1 in hero section */
+  /* text-shadow is applied via inline style in index.html for that specific h1, which is fine for a unique hero title */
+  /* Color is also handled by Tailwind class .text-white */
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #f7df1eaa);
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Galaxy Animation Specific Styles */
+#sombreroCanvas {
+  position: absolute; /* Changed from fixed to work within the relative hero section */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind hero content, but above hero background if any */
+  opacity: 0.6;
 }
 
 #galaxy-vignette {
-  pointer-events: none;
-  position: fixed;
-  left: 0;
+  position: absolute; /* Changed from fixed to work within the relative hero section */
   top: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1; /* Above canvas, below content */
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.25) 100%);
-  transition: opacity 0.4s;
-  opacity: 1;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Above canvas, below hero content */
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(10, 25, 47, 0) 60%, rgba(10, 25, 47, 0.8) 100%);
+  /* transition: opacity 0.4s; */ /* This was in the old src/style.css, check if needed */
+  /* opacity: 1; */ /* This was in the old src/style.css, check if needed */
 }
 
+/* This was in src/style.css, seems related to galaxy, keeping for now */
 #galaxy-accent {
-  position: fixed;
-  left: 0; top: 0; width: 100vw; height: 100vh;
+  position: absolute; /* Changed from fixed to absolute to be contained within the hero section */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 0; /* Same z-index as sombreroCanvas, order in DOM will matter or adjust if needed */
   background: radial-gradient(circle at 50% 60%, 
     rgba(80,180,255,0.09) 0%, 
     rgba(80,180,255,0.07) 18%,
@@ -107,15 +85,89 @@ button:focus-visible {
   );
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Hero Section Specific */
+.hero-content-container {
+  position: relative;
+  z-index: 10; /* Ensures it's above the canvas and vignette */
+  animation: fadeInUp 1s ease-out 0.2s;
+  animation-fill-mode: backwards;
+}
+
+/* Keyframe for fadeInUp (if not already defined elsewhere or via Tailwind) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+/* Navigation Link Styles */
+.nav-link {
+  position: relative;
+  padding-bottom: 6px; 
+  font-weight: 500; 
+  color: #B0C4DE; /* Consider using Tailwind theme colors if available */
+  user-select: none;
+  caret-color: transparent;
+}
+.nav-link:hover {
+  color: #E0F2FE; /* Consider using Tailwind theme colors */
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #64FFDA; /* Consider using Tailwind theme colors */
+  transition: width 0.3s ease-in-out;
+}
+.nav-link:hover::after,
+.nav-link.active::after { /* JS will need to add 'active' class */
+  width: 100%;
+}
+
+/* Section Title Styles */
+.section-title-main {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700; 
+  color: #E0F2FE; /* Consider using Tailwind theme colors */
+  letter-spacing: 0.02em;
+  user-select: none;
+  caret-color: transparent;
+}
+
+/* Content Block Styles */
+.content-block {
+  background-color: rgba(17, 24, 39, 0.3); 
+  border: 1px solid rgba(55, 65, 81, 0.4); 
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 4px 10px -4px rgba(0,0,0,0.1);
+  backdrop-filter: blur(3px);
+  /* caret-color: transparent; was applied individually, now global below */
+}
+
+/* Project Card Title Styles */
+.project-card-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #E0F2FE; /* Consider using Tailwind theme colors */
+  user-select: none;
+  caret-color: transparent;
+}
+
+/* Global Caret Color Hiding (except for inputs/textareas) */
+/* Apply to specific elements if a blanket approach is too broad */
+body, header, main, section, div, h1, h2, h3, p, li, span, label, a {
+  caret-color: transparent;
+}
+input, textarea {
+  caret-color: auto; /* Or your desired caret color for form fields */
+}
+
+/* Removed default Vite styles for a, #app, .logo, .card, .read-the-docs, button */
+/* Removed light theme media query as site is dark-themed */
