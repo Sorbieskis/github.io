@@ -32,16 +32,16 @@ export function createGalaxyCore(params, galaxyGroup) {
         if (r < coreRadius * 0.18 && Math.random() < 0.15) { 
             pColor = colorBright.clone().lerp(new THREE.Color('#B0DCFF'), 0.3); 
             // Add luminosity-based color variation
-            const luminosity = 1.8 + Math.random() * 0.8;
+            const luminosity = 1.1 + Math.random() * 0.5;
             pColor.r *= luminosity * (0.9 + Math.random() * 0.2);
             pColor.g *= luminosity * (0.85 + Math.random() * 0.25);
             pColor.b *= luminosity * (1.1 + Math.random() * 0.3);
             sizes[j] = params.coreSize * 2.5 * (1.1 + Math.random() * 0.7);
         } else if (r < coreRadius * 0.25) { 
             pColor = colorBright.clone(); 
-            pColor.r *= (1.8 + Math.random() * 1.2); 
-            pColor.g *= (1.8 + Math.random() * 1.0); 
-            pColor.b *= (1.5 + Math.random() * 0.7); 
+            pColor.r *= (1.1 + Math.random() * 0.7);
+            pColor.g *= (1.1 + Math.random() * 0.6);
+            pColor.b *= (0.9 + Math.random() * 0.4);
             sizes[j] = params.coreSize * (1.5 + Math.random() * 0.7);
         } else if (r < coreRadius * 0.65) { 
             pColor = Math.random() > 0.3 ? color1.clone() : colorBright.clone().lerp(color1, 0.4); 

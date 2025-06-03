@@ -40,10 +40,9 @@ export function createCameraController(scene, params) {
 }
 
 export function updateCameraController(
-    cameraController, 
-    scrollCurrent, 
-    mouseX, 
-    mouseY, 
+    cameraController,
+    easedScroll,
+    mouseState,  // Declare mouseState as parameter
     elapsedTime
 ) {
     const {
@@ -60,7 +59,15 @@ export function updateCameraController(
     const SPRING_IDLE_DELAY = 0.7;
     const MOUSE_LERP = 0.05;
     
-    const easedScroll = scrollCurrent;
+    // Create local state if not provided
+    let localMouseState = mouseState || {
+        mouseX: 0,
+        mouseY: 0,
+        targetMouseX: 0,
+        targetMouseY: 0,
+        lastMouseMoveTime: performance.now()
+    };
+
     let targetDollyZ = initialDollyZ - (easedScroll * (initialDollyZ - 55));
     let targetRigYRotation = (easedScroll * totalRigYSweep) - (totalRigYSweep / 2);
     let targetRigXRotation = initialRigXRotation - (easedScroll * (initialRigXRotation - 0));
@@ -68,15 +75,15 @@ export function updateCameraController(
     // Apply mouse influence to rig rotation targets when fully zoomed
     if (easedScroll > 0.98) {
         const effectStrength = Math.max(0, (easedScroll - 0.98) / 0.02);
-        const mouseInfluenceY = mouseX * (Math.PI / 72) * effectStrength;
-        const mouseInfluenceX = -mouseY * (Math.PI / 90) * effectStrength;
+        const mouseInfluenceY = localMouseState.mouseX * (Math.PI / 72) * effectStrength;
+        const mouseInfluenceX = -localMouseState.mouseY * (Math.PI / 90) * effectStrength;
 
         targetRigYRotation = ((1.0 * totalRigYSweep) - (totalRigYSweep / 2)) + mouseInfluenceY;
         targetRigXRotation = 0 + mouseInfluenceX;
     }
 
     // Breathing Effect at Rest
-    const idleTime = performance.now() - lastMouseMoveTime;
+    const idleTime = performance.now() - localMouseState.lastMouseMoveTime;
     if (easedScroll > 0.99 && idleTime > SPRING_IDLE_DELAY * 1000) {
         const breathAmount = 1.0;
         const breathSpeed = 0.35;
@@ -94,10 +101,10 @@ export function updateCameraController(
     camera.updateProjectionMatrix();
     
     // Update mouse positions
-    mouseState.mouseX += (mouseState.targetMouseX - mouseState.mouseX) * MOUSE_LERP;
-    mouseState.mouseY += (mouseState.targetMouseY - mouseState.mouseY) * MOUSE_LERP;
+    localMouseState.mouseX += (localMouseState.targetMouseX - localMouseState.mouseX) * MOUSE_LERP;
+    localMouseState.mouseY += (localMouseState.targetMouseY - localMouseState.mouseY) * MOUSE_LERP;
     
-    return mouseState;
+    return localMouseState;
 }
 
 // Mouse tracking variables

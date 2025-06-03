@@ -1,3 +1,5 @@
 import { init } from './galaxy/main.js';
-document.addEventListener('DOMContentLoaded', init);
+
+export { init }; // Export init at top level
+
 window.scrollTo(0, 0);

@@ -5,6 +5,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
+// Removed duplicate export statement - init is already exported via 'export function init'
+
 import { createGalaxyCore } from './core/galaxy-core.js';
 import { createGalaxyDisk } from './disk/galaxy-disk.js';
 import { createDustLaneParticles } from './dust/dust-lanes.js';
@@ -110,11 +112,12 @@ function animate() {
     const easedScroll = easeInOutCubic(scrollCurrent);
     window._easedScroll = easedScroll;
     
-    if (cameraController) {
+    if (cameraController && mouseState) {
         mouseState = updateCameraController(
             cameraController, 
             easedScroll, 
-            mouseState, 
+            mouseState.mouseX, 
+            mouseState.mouseY, 
             elapsedTime
         );
     }
