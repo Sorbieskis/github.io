@@ -175,3 +175,34 @@ input, textarea {
 
 /* Removed default Vite styles for a, #app, .logo, .card, .read-the-docs, button */
 /* Removed light theme media query as site is dark-themed */
+
+/* Mobile Menu Styles */
+#mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transform: translateY(-10px);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#mobile-menu:not(.hidden) {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Ensure header has relative positioning for mobile menu */
+header {
+  position: relative;
+}
+
+/* Hide mobile menu on larger screens */
+@media (min-width: 768px) {
+  #mobile-menu {
+    display: none !important;
+  }
+}

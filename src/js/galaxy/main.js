@@ -15,8 +15,13 @@ import { createCameraController, updateCameraController, setupMouseControls } fr
 import { VignetteShader } from './effects/shaders/particle-shaders.js';
 
 const params = {
-    coreParticleCount: 20000, coreColor1: '#FFFAE0', coreColor2: '#FFEBCD', coreColorBright: '#FFFFFF',
-    coreSize: 0.35, coreOpacity: 0.9, coreRadius: 22, 
+    coreParticleCount: 12000,
+    coreColor1: '#FFFAE0',
+    coreColor2: '#FFEBCD',
+    coreColorBright: '#A0A0A0',
+    coreSize: 0.2, // Further reduced base size
+    coreOpacity: 0.5, // Further reduced opacity
+    coreRadius: 25,
     diskParticleCount: 50000, diskColor1: '#B0DCFF', diskColor2: '#DADAFE', diskColor3: '#FFFFFF',
     diskSize: 0.28, diskOpacity: 0.7, numSpiralArms: 4, spiralTightness: 0.28, armSpread: 2.5,
     armLength: 140, armInnerRadiusFactor: 0.25,

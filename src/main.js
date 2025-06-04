@@ -1,9 +1,10 @@
 import './style.css';
 import './input.css';
 import { init as initGalaxyAnimation } from './js/galaxy-animation.js';
+import { GalaxyConfig } from './js/galaxy/core/galaxy-core.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initGalaxyAnimation();
+  initGalaxyAnimation(GalaxyConfig);
   
   const yearSpan = document.getElementById('year');
   if (yearSpan) yearSpan.textContent = new Date().getFullYear();
@@ -80,5 +81,38 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(updateUIBasedOnScroll);
   } else {
     console.error('Required elements for scroll animation not found.');
+  }
+});
+
+// Mobile menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  if (mobileMenuButton && mobileMenu) {
+    // Toggle menu visibility
+    mobileMenuButton.addEventListener('click', function() {
+      const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+      mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!mobileMenu.contains(event.target) && 
+          !mobileMenuButton.contains(event.target) && 
+          !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+    
+    // Close menu when clicking nav links
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
+      });
+    });
   }
 });
