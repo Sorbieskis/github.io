@@ -142,7 +142,7 @@ function animate() {
     else if (renderer && scene && camera) renderer.render(scene, camera);
 }
 
-export function init() {
+export function initGalaxy() {
     console.log("Starting galaxy initialization...");
     clock = new Clock();
     scene = new Scene();
@@ -193,7 +193,7 @@ export function init() {
     animate();
     
     const textureLoader = new TextureLoader();
-    textureLoader.load('https://threejs.org/examples/textures/sprites/glow.png', (glowTexture) => {
+    textureLoader.load('/assets/textures/glow.png', (glowTexture) => {
         const glowMaterial = new SpriteMaterial({ 
             map: glowTexture, 
             color: 0xffffff, 

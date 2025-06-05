@@ -4,12 +4,18 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" alt="Vite logo" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Interactive galaxy visualization showcasing Three.js and web performance optimizations">
     <title>Deimonas Suchanka | Engineering Portfolio</title>
-    <!-- Preconnect for Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <!-- Optimized font loading with preconnect and preload -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Only load needed font weights, add display=swap for faster rendering -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@700&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@400;700;900&display=swap">
+    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v34/yMJMMIlzdvalmentajaiv3qjP4Y15g.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKfg.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@400;700;900&display=swap">
+    </noscript>
     <!-- Performance meta tags -->
     <meta http-equiv="Cache-Control" content="public, max-age=31536000">
     <meta name="theme-color" content="#0A192F">
@@ -202,22 +208,6 @@
     </footer>
 
     <script type="module" src="/src/main.js" defer></script>
-    <!-- Lazy load galaxy animation when in viewport -->
-    <script type="module">
-      document.addEventListener('DOMContentLoaded', () => {
-        const canvas = document.getElementById('sombreroCanvas');
-        if (!canvas) return;
-
-        const observer = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting) {
-            import('./src/js/galaxy-animation.js');
-            observer.disconnect();
-          }
-        }, { threshold: 0.1 });
-
-        observer.observe(canvas);
-      });
-    </script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Smooth scroll with offset for fixed header
