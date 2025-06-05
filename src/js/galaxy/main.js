@@ -1,4 +1,15 @@
-import * as THREE from 'three';
+import {
+  Scene,
+  WebGLRenderer,
+  SRGBColorSpace,
+  Group,
+  TextureLoader,
+  SpriteMaterial,
+  Sprite,
+  Vector2,
+  AdditiveBlending,
+  Clock
+} from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -71,7 +82,7 @@ function setupPostProcessing() {
     composer.addPass(renderPass);
     
     bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight), 
+        new Vector2(window.innerWidth, window.innerHeight), 
         params.bloomStrength, 
         params.bloomRadius, 
         params.bloomThreshold
@@ -133,8 +144,8 @@ function animate() {
 
 export function init() {
     console.log("Starting galaxy initialization...");
-    clock = new THREE.Clock(); 
-    scene = new THREE.Scene();
+    clock = new Clock();
+    scene = new Scene();
     
     canvasElement = document.getElementById('sombreroCanvas');
     if (!canvasElement) {
@@ -149,16 +160,16 @@ export function init() {
     canvasElement.style.height = "100vh";
     canvasElement.style.zIndex = "-2";
     
-    renderer = new THREE.WebGLRenderer({ 
+    renderer = new WebGLRenderer({ 
         canvas: canvasElement, 
         antialias: true, 
         alpha: true 
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.outputColorSpace = SRGBColorSpace;
     renderer.setClearColor(0x000000, 1);
     
-    galaxyGroup = new THREE.Group();
+    galaxyGroup = new Group();
     scene.add(galaxyGroup);
     
     cameraController = createCameraController(scene, params);
@@ -181,16 +192,16 @@ export function init() {
     console.log("Initialization complete. Starting animation loop.");
     animate();
     
-    const textureLoader = new THREE.TextureLoader();
+    const textureLoader = new TextureLoader();
     textureLoader.load('https://threejs.org/examples/textures/sprites/glow.png', (glowTexture) => {
-        const glowMaterial = new THREE.SpriteMaterial({ 
+        const glowMaterial = new SpriteMaterial({ 
             map: glowTexture, 
             color: 0xffffff, 
-            blending: THREE.AdditiveBlending, 
+            blending: AdditiveBlending, 
             transparent: true, 
             opacity: 0.22 
         });
-        const glowSprite = new THREE.Sprite(glowMaterial);
+        const glowSprite = new Sprite(glowMaterial);
         glowSprite.scale.set(60, 60, 1);
         glowSprite.position.set(0, 0, 0);
         galaxyGroup.add(glowSprite);

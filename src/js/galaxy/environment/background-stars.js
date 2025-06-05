@@ -1,4 +1,11 @@
-import * as THREE from 'three';
+import {
+  Color,
+  BufferGeometry,
+  BufferAttribute,
+  ShaderMaterial,
+  AdditiveBlending,
+  Points
+} from 'three';
 import { particleVertexShader, particleFragmentShader } from '../effects/shaders/particle-shaders.js';
 
 export function createBackgroundStars(params, scene) {
@@ -8,8 +15,8 @@ export function createBackgroundStars(params, scene) {
     const sizes = new Float32Array(starCount);
     const fadeAttr = new Float32Array(starCount).fill(1.0); 
     
-    const colorWhite = new THREE.Color(0xffffff); 
-    const colorBlueish = new THREE.Color(0xb0b0ff); 
+    const colorWhite = new Color(0xffffff);
+    const colorBlueish = new Color(0xb0b0ff);
     
     for (let i = 0; i < starCount; i++) {
         const r = 250 + Math.random() * 2000; 
@@ -28,7 +35,7 @@ export function createBackgroundStars(params, scene) {
             c = colorBlueish.clone();
         } else {
             // Add orange/yellow stars for diversity
-            c = new THREE.Color(0xffcc88);
+            c = new Color(0xffcc88);
         }
         
         // Apply brightness and color variations
@@ -42,18 +49,18 @@ export function createBackgroundStars(params, scene) {
         sizes[i] = params.bgStarSize * (0.4 + Math.random() * 1.2); 
     }
     
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
-    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3)); 
-    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1)); 
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new BufferAttribute(positions, 3));
+    geometry.setAttribute('aColor', new BufferAttribute(colors, 3));
+    geometry.setAttribute('aSize', new BufferAttribute(sizes, 1));
     
-    const dummyRotationSpeeds = new Float32Array(starCount).fill(0); 
-    const dummyDistances = new Float32Array(starCount).fill(0); 
-    geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(dummyRotationSpeeds, 1)); 
-    geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(dummyDistances, 1)); 
-    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1)); 
+    const dummyRotationSpeeds = new Float32Array(starCount).fill(0);
+    const dummyDistances = new Float32Array(starCount).fill(0);
+    geometry.setAttribute('aRotationSpeed', new BufferAttribute(dummyRotationSpeeds, 1));
+    geometry.setAttribute('aDistanceFromCenter', new BufferAttribute(dummyDistances, 1));
+    geometry.setAttribute('aFade', new BufferAttribute(fadeAttr, 1));
     
-    const material = new THREE.ShaderMaterial({ 
+    const material = new ShaderMaterial({
         uniforms: { 
             uTime: { value: 0.0 }, 
             uSize: { value: params.particleBaseSize * 0.4 }, 
@@ -62,12 +69,12 @@ export function createBackgroundStars(params, scene) {
         }, 
         vertexShader: particleVertexShader, 
         fragmentShader: particleFragmentShader, 
-        blending: THREE.AdditiveBlending, 
+        blending: AdditiveBlending,
         depthWrite: false, 
         transparent: true, 
     }); 
     
-    const backgroundStars = new THREE.Points(geometry, material); 
+    const backgroundStars = new Points(geometry, material);
     scene.add(backgroundStars);
     
     return backgroundStars;

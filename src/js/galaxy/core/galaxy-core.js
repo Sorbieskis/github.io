@@ -1,4 +1,11 @@
-import * as THREE from 'three';
+import {
+  Color,
+  BufferGeometry,
+  BufferAttribute,
+  ShaderMaterial,
+  AdditiveBlending,
+  Points
+} from 'three';
 import { particleVertexShader, particleFragmentShader } from '../effects/shaders/particle-shaders.js';
 
 // Galaxy Core Configuration
@@ -24,9 +31,9 @@ export function createGalaxyCore(params, group) {
   const twinkleSpeeds = new Float32Array(particleCount);
   const fadeAttr = new Float32Array(particleCount).fill(1.0);
 
-  const color1 = new THREE.Color(params.coreColor1 || '#FFFAE0');
-  const color2 = new THREE.Color(params.coreColor2 || '#FFEBCD');
-  const colorBright = new THREE.Color(params.coreColorBright || '#FFFFFF');
+  const color1 = new Color(params.coreColor1 || '#FFFAE0');
+  const color2 = new Color(params.coreColor2 || '#FFEBCD');
+  const colorBright = new Color(params.coreColorBright || '#FFFFFF');
   const coreRadius = params.coreRadius || 22;
 
   for (let i = 0; i < particleCount; i++) {
@@ -57,16 +64,16 @@ export function createGalaxyCore(params, group) {
     twinkleSpeeds[i] = Math.random() < 0.2 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0;
   }
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
-  geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-  geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1));
-  geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1));
-  geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1));
-  geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1));
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new BufferAttribute(positions, 3));
+  geometry.setAttribute('aColor', new BufferAttribute(colors, 3));
+  geometry.setAttribute('aSize', new BufferAttribute(sizes, 1));
+  geometry.setAttribute('aRotationSpeed', new BufferAttribute(rotationSpeeds, 1));
+  geometry.setAttribute('aDistanceFromCenter', new BufferAttribute(distanceFromCenterAttr, 1));
+  geometry.setAttribute('aTwinkleSpeed', new BufferAttribute(twinkleSpeeds, 1));
+  geometry.setAttribute('aFade', new BufferAttribute(fadeAttr, 1));
 
-  const material = new THREE.ShaderMaterial({
+  const material = new ShaderMaterial({
     uniforms: {
       uTime: { value: 0.0 },
       uSize: { value: params.particleBaseSize },
@@ -76,12 +83,12 @@ export function createGalaxyCore(params, group) {
     },
     vertexShader: particleVertexShader,
     fragmentShader: particleFragmentShader,
-    blending: THREE.AdditiveBlending,
+    blending: AdditiveBlending,
     depthWrite: false,
     transparent: true,
   });
 
-  const points = new THREE.Points(geometry, material);
+  const points = new Points(geometry, material);
   group.add(points);
   return points;
 }

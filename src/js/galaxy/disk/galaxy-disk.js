@@ -1,4 +1,11 @@
-import * as THREE from 'three';
+import {
+  Color,
+  BufferGeometry,
+  BufferAttribute,
+  ShaderMaterial,
+  AdditiveBlending,
+  Points
+} from 'three';
 import { particleVertexShader, particleFragmentShader } from '../effects/shaders/particle-shaders.js';
 
 export function createGalaxyDisk(params, galaxyGroup) {
@@ -11,9 +18,9 @@ export function createGalaxyDisk(params, galaxyGroup) {
     const twinkleSpeeds = new Float32Array(particleCount);
     const fadeAttr = new Float32Array(particleCount).fill(1.0); 
     
-    const color1 = new THREE.Color(params.diskColor1); 
-    const color2 = new THREE.Color(params.diskColor2); 
-    const color3 = new THREE.Color(params.diskColor3); 
+    const color1 = new Color(params.diskColor1);
+    const color2 = new Color(params.diskColor2);
+    const color3 = new Color(params.diskColor3);
     const baseColors = [color1, color2, color3];
     
     const numArms = params.numSpiralArms; 
@@ -57,9 +64,9 @@ export function createGalaxyDisk(params, galaxyGroup) {
         }
         
         // Apply random variations
-        if (Math.random() < 0.08) baseColor.lerp(new THREE.Color('#FFD6E0'), 0.3 + Math.random() * 0.3);
-        if (Math.random() < 0.08) baseColor.lerp(new THREE.Color('#B0FFEA'), 0.3 + Math.random() * 0.3);
-        baseColor.lerp(new THREE.Color(0xffffff), Math.random() * 0.1);
+        if (Math.random() < 0.08) baseColor.lerp(new Color('#FFD6E0'), 0.3 + Math.random() * 0.3);
+        if (Math.random() < 0.08) baseColor.lerp(new Color('#B0FFEA'), 0.3 + Math.random() * 0.3);
+        baseColor.lerp(new Color(0xffffff), Math.random() * 0.1);
         
         // Add radial color variation (inner = yellower, outer = bluer)
         const radialFactor = (r - minArmRadius) / (armLength - minArmRadius);
@@ -81,16 +88,16 @@ export function createGalaxyDisk(params, galaxyGroup) {
         twinkleSpeeds[i] = Math.random() < 0.12 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0; 
     }
     
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
-    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3)); 
-    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1)); 
-    geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1)); 
-    geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1)); 
-    geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1)); 
-    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1)); 
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new BufferAttribute(positions, 3));
+    geometry.setAttribute('aColor', new BufferAttribute(colors, 3));
+    geometry.setAttribute('aSize', new BufferAttribute(sizes, 1));
+    geometry.setAttribute('aRotationSpeed', new BufferAttribute(rotationSpeeds, 1));
+    geometry.setAttribute('aDistanceFromCenter', new BufferAttribute(distanceFromCenterAttr, 1));
+    geometry.setAttribute('aTwinkleSpeed', new BufferAttribute(twinkleSpeeds, 1));
+    geometry.setAttribute('aFade', new BufferAttribute(fadeAttr, 1));
     
-    const material = new THREE.ShaderMaterial({ 
+    const material = new ShaderMaterial({
         uniforms: { 
             uTime: { value: 0.0 }, 
             uSize: { value: params.particleBaseSize }, 
@@ -100,12 +107,12 @@ export function createGalaxyDisk(params, galaxyGroup) {
         }, 
         vertexShader: particleVertexShader, 
         fragmentShader: particleFragmentShader, 
-        blending: THREE.AdditiveBlending, 
+        blending: AdditiveBlending,
         depthWrite: false, 
         transparent: true,
     }); 
     
-    const particlesDisk = new THREE.Points(geometry, material); 
+    const particlesDisk = new Points(geometry, material);
     galaxyGroup.add(particlesDisk);
     
     return particlesDisk;

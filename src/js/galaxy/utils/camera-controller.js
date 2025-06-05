@@ -1,12 +1,15 @@
-import * as THREE from 'three';
+import {
+  Object3D,
+  PerspectiveCamera
+} from 'three';
 
 export function createCameraController(scene, params) {
     // Setup Camera Rig
-    const cameraRigY = new THREE.Object3D();
-    const cameraRigX = new THREE.Object3D();
-    const cameraDolly = new THREE.Object3D();
+    const cameraRigY = new Object3D();
+    const cameraRigX = new Object3D();
+    const cameraDolly = new Object3D();
 
-    const camera = new THREE.PerspectiveCamera(
+    const camera = new PerspectiveCamera(
         params.cameraFov, 
         window.innerWidth / window.innerHeight, 
         0.1, 

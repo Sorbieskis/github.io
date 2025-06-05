@@ -48,8 +48,11 @@ h1 {
 /* #sombreroCanvas styling is primarily handled by JS for fixed positioning and z-index */
 /* CSS can provide a fallback or base if needed, but JS will override for the global background effect. */
 #sombreroCanvas {
-  opacity: 0.6; /* Retain opacity control */
-  /* position, top, left, width, height, z-index are set by galaxy-animation.js */
+  opacity: 0.6;
+  width: 100%;
+  height: 100vh;
+  display: block;
+  /* position, top, left, z-index are set by galaxy-animation.js */
 }
 
 #galaxy-vignette {
@@ -126,10 +129,12 @@ h1 {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 0;
+  width: 100%;
   height: 2px;
   background-color: #64FFDA; /* Consider using Tailwind theme colors */
-  transition: width 0.3s ease-in-out;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease-in-out;
 }
 .nav-link:hover::after,
 .nav-link.active::after { /* JS will need to add 'active' class */

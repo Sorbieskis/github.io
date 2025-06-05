@@ -1,4 +1,11 @@
-import * as THREE from 'three';
+import {
+  Color,
+  BufferGeometry,
+  BufferAttribute,
+  ShaderMaterial,
+  NormalBlending,
+  Points
+} from 'three';
 import { particleVertexShader, particleFragmentShader } from '../effects/shaders/particle-shaders.js';
 
 export function createDustLaneParticles(params, galaxyGroup) {
@@ -10,8 +17,8 @@ export function createDustLaneParticles(params, galaxyGroup) {
     const distanceFromCenterAttr = new Float32Array(particleCount); 
     const fadeAttr = new Float32Array(particleCount).fill(1.0); 
     
-    const color1 = new THREE.Color(params.dustColor1); 
-    const color2 = new THREE.Color(params.dustColor2); 
+    const color1 = new Color(params.dustColor1);
+    const color2 = new Color(params.dustColor2);
     const radiusMin = params.dustLaneRadiusMin; 
     const radiusMax = params.dustLaneRadiusMax; 
     const thickness = params.dustLaneThickness; 
@@ -29,7 +36,7 @@ export function createDustLaneParticles(params, galaxyGroup) {
         positions[i * 3 + 1] = y_offset; 
         positions[i * 3 + 2] = Math.sin(angle_torus) * (r_torus + x_offset); 
         
-        let mixedColor = Math.random() > 0.5 ? color1.clone() : color2.clone(); 
+        let mixedColor = Math.random() > 0.5 ? color1.clone() : color2.clone();
         mixedColor.lerp(color1, Math.random() * 0.3); 
         
         // Add subtle color variations based on position
@@ -46,20 +53,20 @@ export function createDustLaneParticles(params, galaxyGroup) {
         
         sizes[i] = params.dustParticleSize * (0.7 + Math.random() * 0.6); 
         
-        const normalizedDist = (r_torus - radiusMin) / (radiusMax - radiusMin); 
+        const normalizedDist = (r_torus - radiusMin) / (radiusMax - radiusMin);
         rotationSpeeds[i] = ((0.15 - normalizedDist * 0.1) * (0.8 + Math.random() * 0.4)) * params.dustParticleRotationSpeedFactor; 
         distanceFromCenterAttr[i] = r_torus; 
     }
     
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
-    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3)); 
-    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1)); 
-    geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1)); 
-    geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1)); 
-    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1)); 
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new BufferAttribute(positions, 3)); 
+    geometry.setAttribute('aColor', new BufferAttribute(colors, 3)); 
+    geometry.setAttribute('aSize', new BufferAttribute(sizes, 1)); 
+    geometry.setAttribute('aRotationSpeed', new BufferAttribute(rotationSpeeds, 1)); 
+    geometry.setAttribute('aDistanceFromCenter', new BufferAttribute(distanceFromCenterAttr, 1)); 
+    geometry.setAttribute('aFade', new BufferAttribute(fadeAttr, 1)); 
     
-    const material = new THREE.ShaderMaterial({ 
+    const material = new ShaderMaterial({
         uniforms: { 
             uTime: { value: 0.0 }, 
             uSize: { value: params.particleBaseSize }, 
@@ -68,12 +75,12 @@ export function createDustLaneParticles(params, galaxyGroup) {
         }, 
         vertexShader: particleVertexShader, 
         fragmentShader: particleFragmentShader, 
-        blending: THREE.NormalBlending, 
+        blending: NormalBlending,
         depthWrite: false, 
         transparent: true, 
     }); 
     
-    const dustLaneParticles = new THREE.Points(geometry, material); 
+    const dustLaneParticles = new Points(geometry, material);
     galaxyGroup.add(dustLaneParticles);
     
     return dustLaneParticles;
