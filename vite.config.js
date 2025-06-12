@@ -4,6 +4,17 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: '/', // Ensure base is '/' for standard Netlify deployment
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: '0.0.0.0',
+    hmr: {
+      host: 'localhost',
+      port: 5173,
+      protocol: 'ws',
+      clientPort: 5173
+    }
+  },
   build: {
     minify: 'terser',
     cssMinify: true,

@@ -1,3 +1,7 @@
+import './style.css';
+
+import './style.css';
+
 document.addEventListener('DOMContentLoaded', () => {
   // Show loading indicator
   const loader = document.createElement('div');
