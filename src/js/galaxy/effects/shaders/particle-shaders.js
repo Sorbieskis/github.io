@@ -5,11 +5,12 @@ export const particleVertexShader = `
     uniform float uScale;
 
     attribute float aSize; 
-    attribute vec3 aColor;
-    attribute float aRotationSpeed; 
+    attribute vec3 aColor; // Only using first color now - others will be uniforms
+    attribute float aRotationSpeed;
     attribute float aDistanceFromCenter;
     attribute float aTwinkleSpeed;
-    attribute float aFade; 
+    attribute float aSeed;
+    attribute float aFade;
 
     varying vec3 vColor;
     varying float vParticleOpacityFactor;
@@ -22,7 +23,12 @@ export const particleVertexShader = `
         if (aTwinkleSpeed != 0.0) {
             twinkle = 0.78 + 0.32 * sin(uTime * aTwinkleSpeed * 0.7 + aDistanceFromCenter * 0.1);
         }
-        vParticleOpacityFactor = twinkle; 
+        // Add subtle twinkling effect to all disk particles
+        float starTwinkle = 1.0;
+        if (aDistanceFromCenter > 0.0) {
+            starTwinkle = 1.0 + 0.1 * sin(uTime * 3.14159 + aSeed * 6.28318);
+        }
+        vParticleOpacityFactor = twinkle * starTwinkle;
         vFade = aFade; 
         vDistanceFromCenter = aDistanceFromCenter;
 
@@ -51,14 +57,23 @@ export const particleFragmentShader = `
         float alpha = 1.0 - smoothstep(0.3, 0.5, dist); 
         if (alpha < 0.001) discard;
         
-        // Apply redshift based on distance
-        float distanceFactor = vDistanceFromCenter / uMaxDistance;
-        vec3 shiftedColor = vColor;
-        shiftedColor.r *= 1.0 + distanceFactor * 0.4;
-        shiftedColor.g *= 1.0 - distanceFactor * 0.2;
-        shiftedColor.b *= 1.0 - distanceFactor * 0.3;
+        // Three-color gradient based on distance
+        float distanceFactor = clamp(vDistanceFromCenter / uMaxDistance, 0.0, 1.0);
         
-        gl_FragColor = vec4(shiftedColor, alpha * uParticleOpacity * vParticleOpacityFactor * vFade);
+        // Define our three colors (matches params in main.js)
+        vec3 colorInner = vec3(0.690, 0.862, 1.0);   // #B0DCFF
+        vec3 colorMid = vec3(1.0, 0.714, 0.757);     // #FFB6C1
+        vec3 colorOuter = vec3(1.0, 0.855, 0.725);   // #FFDAB9
+        
+        // Smooth transitions between color zones
+        float innerToMid = smoothstep(0.0, 0.4, distanceFactor);
+        float midToOuter = smoothstep(0.4, 0.8, distanceFactor);
+        
+        // Blend between colors
+        vec3 color = mix(colorInner, colorMid, innerToMid);
+        color = mix(color, colorOuter, midToOuter);
+        
+        gl_FragColor = vec4(color, alpha * uParticleOpacity * vParticleOpacityFactor * vFade);
     }
 `;
 

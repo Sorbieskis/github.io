@@ -5,26 +5,35 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-// Removed duplicate export statement - init is already exported via 'export function init'
-
 import { createGalaxyCore } from './core/galaxy-core.js';
 import { createGalaxyDisk } from './disk/galaxy-disk.js';
-import { createDustLaneParticles } from './dust/dust-lanes.js';
+// Correctly import the particle-based dust lanes function
+import { createDustLanes } from './dust/dust-lanes.js'; 
 import { createBackgroundStars } from './environment/background-stars.js';
 import { createCameraController, updateCameraController, setupMouseControls } from './utils/camera-controller.js';
 import { VignetteShader } from './effects/shaders/particle-shaders.js';
 
+// Parameters adjusted for the final particle-based dust lane approach
 const params = {
     coreParticleCount: 20000, coreColor1: '#FFFAE0', coreColor2: '#FFEBCD', coreColorBright: '#FFFFFF',
-    coreSize: 0.35, coreOpacity: 0.9, coreRadius: 22, 
-    diskParticleCount: 50000, diskColor1: '#B0DCFF', diskColor2: '#DADAFE', diskColor3: '#FFFFFF',
+    coreSize: 0.35, coreOpacity: 0.9, coreRadius: 22,
+    diskParticleCount: 50000, diskColor1: '#FFDAB9', diskColor2: '#FFB6C1', diskColor3: '#B0DCFF',
     diskSize: 0.28, diskOpacity: 0.7, numSpiralArms: 4, spiralTightness: 0.28, armSpread: 2.5,
     armLength: 140, armInnerRadiusFactor: 0.25,
-    dustParticleCount: 60000, dustColor1: '#2c1f1f', dustColor2: '#382828', dustParticleSize: 0.2,
-    dustOpacity: 0.35, dustLaneRadiusMin: 75, dustLaneRadiusMax: 115, dustLaneThickness: 15,
+    // A high particle count is key for the new dust lane effect
+    dustParticleCount: 150000, 
+    dustColor1: '#4B3621', 
+    dustColor2: '#3D2B1F', 
+    // UPDATED: Increased base size for more prominent particles from a distance
+    dustParticleSize: 0.5,
+    // UPDATED: Increased base opacity for more visible dust clouds
+    dustOpacity: 0.75,
+    dustLaneRadiusMin: 40, 
+    dustLaneRadiusMax: 120, 
+    dustLaneThickness: 25,
     dustParticleRotationSpeedFactor: 0.5, 
-    bgStarCount: 1500, bgStarSize: 0.06, bgStarOpacity: 0.35,
-    bloomEnabled: false, bloomThreshold: 0.45, bloomStrength: 0.5, bloomRadius: 0.7,    
+    bgStarCount: 15000, bgStarSize: 0.06, bgStarOpacity: 0.35,
+    bloomEnabled: true, bloomThreshold: 0.8, bloomStrength: 0.4, bloomRadius: 0.5,
     cameraFov: 55, particleBaseSize: 1.5, particlePerspectiveScale: 380.0, 
 };
 
@@ -36,10 +45,12 @@ let cameraController;
 let mouseState;
 let scrollTarget = 0;
 let scrollCurrent = 0;
-let lastFrameTime = 0;
 let animationFrameId = null;
 let isAnimationPaused = false;
+let mouseRotationFactor = 1.0;
+let targetRotationFactor = 1.0;
 const LERP_FACTOR = 0.025;
+const MOUSE_SENSITIVITY = 0.4;
 let projectsSectionTop = null;
 
 function updateProjectsSectionTop() {
@@ -107,14 +118,34 @@ function animate() {
     animationFrameId = requestAnimationFrame(animate);
     const elapsedTime = isAnimationPaused ? 0 : clock.getElapsedTime();
     
-    if (particlesCore) particlesCore.material.uniforms.uTime.value = elapsedTime;
-    if (particlesDisk) particlesDisk.material.uniforms.uTime.value = elapsedTime; 
-    if (dustLaneParticles) dustLaneParticles.material.uniforms.uTime.value = elapsedTime;
+    mouseRotationFactor += (targetRotationFactor - mouseRotationFactor) * 0.1;
+    
+    const adjustedTime = elapsedTime * mouseRotationFactor;
+    // Animate star systems using shader time
+    if (particlesCore) particlesCore.material.uniforms.uTime.value = adjustedTime;
+    if (particlesDisk) particlesDisk.material.uniforms.uTime.value = adjustedTime;
+
+    // Animate dust system using its custom update function
+    if (dustLaneParticles && dustLaneParticles.userData.update) {
+        dustLaneParticles.userData.update(adjustedTime);
+    }
     
     scrollCurrent += (scrollTarget - scrollCurrent) * LERP_FACTOR;
     const easedScroll = easeInOutCubic(scrollCurrent);
     window._easedScroll = easedScroll;
     
+    // UPDATED: Added fade-out logic for dust lanes to make them less distracting up close
+    if (dustLaneParticles) {
+        // Calculate a fade factor based on scroll position. Starts at 1 (fully visible) and fades to 0.
+        const dustFadeFactor = 1.0 - Math.min(easedScroll / 0.5, 1.0);
+        
+        // Apply the fade to both dust layers
+        dustLaneParticles.children.forEach((layer, index) => {
+            const baseOpacity = (index === 0) ? params.dustOpacity : params.dustOpacity * 0.6;
+            layer.material.opacity = baseOpacity * dustFadeFactor;
+        });
+    }
+
     if (cameraController && mouseState) {
         mouseState = updateCameraController(
             cameraController, 
@@ -132,8 +163,6 @@ function animate() {
 export function init() {
     console.log("Starting galaxy initialization...");
     clock = new THREE.Clock();
-    lastFrameTime = performance.now();
-    lastFrameTime = performance.now(); // Initialize frame timing
     scene = new THREE.Scene();
     
     canvasElement = document.getElementById('sombreroCanvas');
@@ -148,6 +177,15 @@ export function init() {
     canvasElement.style.width = "100vw";
     canvasElement.style.height = "100vh";
     canvasElement.style.zIndex = "-2";
+    
+    canvasElement.addEventListener('mousemove', (event) => {
+        const mouseX = event.clientX / window.innerWidth;
+        targetRotationFactor = 0.8 + mouseX * MOUSE_SENSITIVITY;
+    });
+    
+    canvasElement.addEventListener('mouseleave', () => {
+        targetRotationFactor = 1.0;
+    });
     
     renderer = new THREE.WebGLRenderer({
         canvas: canvasElement,
@@ -168,7 +206,8 @@ export function init() {
     
     particlesCore = createGalaxyCore(params, galaxyGroup);
     particlesDisk = createGalaxyDisk(params, galaxyGroup);
-    dustLaneParticles = createDustLaneParticles(params, galaxyGroup);
+    // Correctly call the particle-based dust lane function
+    dustLaneParticles = createDustLanes(params, galaxyGroup); 
     backgroundStars = createBackgroundStars(params, scene);
     
     handleResize(); 
@@ -181,38 +220,20 @@ export function init() {
     
     console.log("Initialization complete. Starting animation loop.");
     
-    // Handle tab visibility changes
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             if (animationFrameId && !isAnimationPaused) {
                 cancelAnimationFrame(animationFrameId);
                 isAnimationPaused = true;
-                console.log("Animation paused (tab hidden)");
             }
         } else {
             if (isAnimationPaused) {
                 isAnimationPaused = false;
-                clock.start(); // Reset clock to avoid time jump
+                clock.start();
                 animate();
-                console.log("Animation resumed (tab visible)");
             }
         }
     });
 
     animate();
-    
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load('https://threejs.org/examples/textures/sprites/glow.png', (glowTexture) => {
-        const glowMaterial = new THREE.SpriteMaterial({ 
-            map: glowTexture, 
-            color: 0xffffff, 
-            blending: THREE.AdditiveBlending, 
-            transparent: true, 
-            opacity: 0.22 
-        });
-        const glowSprite = new THREE.Sprite(glowMaterial);
-        glowSprite.scale.set(60, 60, 1);
-        glowSprite.position.set(0, 0, 0);
-        galaxyGroup.add(glowSprite);
-    });
 }

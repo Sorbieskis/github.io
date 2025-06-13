@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { particleVertexShader, particleFragmentShader } from '../effects/shaders/particle-shaders.js';
 
 export function createBackgroundStars(params, scene) {
-    const starCount = params.bgStarCount;
+    const starCount = 15000; // Increased to 15000 stars as per Task 1.1
     const positions = new Float32Array(starCount * 3); 
     const colors = new Float32Array(starCount * 3); 
     const sizes = new Float32Array(starCount);
@@ -39,7 +39,7 @@ export function createBackgroundStars(params, scene) {
         colors[i * 3 + 1] = c.g; 
         colors[i * 3 + 2] = c.b;
         
-        sizes[i] = params.bgStarSize * (0.4 + Math.random() * 1.2); 
+        sizes[i] = 0.06 * (0.4 + Math.random() * 1.2); // Set base size to 0.06 as per Task 1.1
     }
     
     const geometry = new THREE.BufferGeometry();
@@ -58,7 +58,7 @@ export function createBackgroundStars(params, scene) {
             uTime: { value: 0.0 }, 
             uSize: { value: params.particleBaseSize * 0.4 }, 
             uScale: { value: params.particlePerspectiveScale * 2.5 }, 
-            uParticleOpacity: { value: params.bgStarOpacity } 
+            uParticleOpacity: { value: 0.35 } // Set opacity to 0.35 as per Task 1.1
         }, 
         vertexShader: particleVertexShader, 
         fragmentShader: particleFragmentShader, 

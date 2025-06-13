@@ -9,7 +9,8 @@ export function createGalaxyDisk(params, galaxyGroup) {
     const rotationSpeeds = new Float32Array(particleCount); 
     const distanceFromCenterAttr = new Float32Array(particleCount); 
     const twinkleSpeeds = new Float32Array(particleCount);
-    const fadeAttr = new Float32Array(particleCount).fill(1.0); 
+    const fadeAttr = new Float32Array(particleCount).fill(1.0);
+    const seeds = new Float32Array(particleCount);
     
     const color1 = new THREE.Color(params.diskColor1); 
     const color2 = new THREE.Color(params.diskColor2); 
@@ -43,31 +44,13 @@ export function createGalaxyDisk(params, galaxyGroup) {
         positions[i * 3 + 1] = y; 
         positions[i * 3 + 2] = z; 
         
-        // Temperature-based coloring (hotter = bluer, cooler = redder)
-        const temperature = Math.random();
-        let baseColor;
-        if (temperature < 0.4) {
-            baseColor = baseColors[0].clone(); // Cooler stars (redder)
-            baseColor.offsetHSL(0.02, 0, 0); 
-        } else if (temperature < 0.7) {
-            baseColor = baseColors[1].clone(); // Medium stars
-        } else {
-            baseColor = baseColors[2].clone(); // Hotter stars (bluer)
-            baseColor.offsetHSL(-0.03, 0, 0);
-        }
+        // Color will be determined in shader based on distance
+        const baseColor = baseColors[0].clone();
         
-        // Apply random variations
-        if (Math.random() < 0.08) baseColor.lerp(new THREE.Color('#FFD6E0'), 0.3 + Math.random() * 0.3);
-        if (Math.random() < 0.08) baseColor.lerp(new THREE.Color('#B0FFEA'), 0.3 + Math.random() * 0.3);
-        baseColor.lerp(new THREE.Color(0xffffff), Math.random() * 0.1);
-        
-        // Add radial color variation (inner = yellower, outer = bluer)
-        const radialFactor = (r - minArmRadius) / (armLength - minArmRadius);
-        baseColor.offsetHSL(radialFactor * -0.05, 0, radialFactor * 0.05);
-        
-        colors[i * 3 + 0] = baseColor.r;
-        colors[i * 3 + 1] = baseColor.g;
-        colors[i * 3 + 2] = baseColor.b;
+        // Store all three colors for shader blending
+        colors[i * 3 + 0] = baseColors[0].r;
+        colors[i * 3 + 1] = baseColors[0].g;
+        colors[i * 3 + 2] = baseColors[0].b;
         
         if (Math.random() < 0.01) { 
             sizes[i] = params.diskSize * 2.5 * (1.1 + Math.random() * 0.7); 
@@ -78,7 +61,8 @@ export function createGalaxyDisk(params, galaxyGroup) {
         const normalizedDistance = r / armLength; 
         rotationSpeeds[i] = (0.3 - normalizedDistance * 0.28) * (0.6 + Math.random() * 0.7); 
         distanceFromCenterAttr[i] = r;
-        twinkleSpeeds[i] = Math.random() < 0.12 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0; 
+        twinkleSpeeds[i] = Math.random() < 0.12 ? (0.7 + Math.random() * 1.2) * (Math.random() < 0.5 ? 1 : -1) : 0;
+        seeds[i] = Math.random();
     }
     
     const geometry = new THREE.BufferGeometry();
@@ -88,7 +72,8 @@ export function createGalaxyDisk(params, galaxyGroup) {
     geometry.setAttribute('aRotationSpeed', new THREE.BufferAttribute(rotationSpeeds, 1)); 
     geometry.setAttribute('aDistanceFromCenter', new THREE.BufferAttribute(distanceFromCenterAttr, 1)); 
     geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1)); 
-    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1)); 
+    geometry.setAttribute('aFade', new THREE.BufferAttribute(fadeAttr, 1));
+    geometry.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
     
     const material = new THREE.ShaderMaterial({ 
         uniforms: { 
