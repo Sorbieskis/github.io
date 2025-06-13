@@ -36,6 +36,9 @@ let cameraController;
 let mouseState;
 let scrollTarget = 0;
 let scrollCurrent = 0;
+let lastFrameTime = 0;
+let animationFrameId = null;
+let isAnimationPaused = false;
 const LERP_FACTOR = 0.025;
 let projectsSectionTop = null;
 
@@ -101,8 +104,8 @@ function easeInOutCubic(t) {
 }
 
 function animate() {
-    requestAnimationFrame(animate);
-    const elapsedTime = clock.getElapsedTime();
+    animationFrameId = requestAnimationFrame(animate);
+    const elapsedTime = isAnimationPaused ? 0 : clock.getElapsedTime();
     
     if (particlesCore) particlesCore.material.uniforms.uTime.value = elapsedTime;
     if (particlesDisk) particlesDisk.material.uniforms.uTime.value = elapsedTime; 
@@ -128,7 +131,9 @@ function animate() {
 
 export function init() {
     console.log("Starting galaxy initialization...");
-    clock = new THREE.Clock(); 
+    clock = new THREE.Clock();
+    lastFrameTime = performance.now();
+    lastFrameTime = performance.now(); // Initialize frame timing
     scene = new THREE.Scene();
     
     canvasElement = document.getElementById('sombreroCanvas');
@@ -144,10 +149,11 @@ export function init() {
     canvasElement.style.height = "100vh";
     canvasElement.style.zIndex = "-2";
     
-    renderer = new THREE.WebGLRenderer({ 
-        canvas: canvasElement, 
-        antialias: true, 
-        alpha: true 
+    renderer = new THREE.WebGLRenderer({
+        canvas: canvasElement,
+        antialias: false,
+        powerPreference: 'high-performance',
+        alpha: true
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -174,6 +180,25 @@ export function init() {
     onScroll();
     
     console.log("Initialization complete. Starting animation loop.");
+    
+    // Handle tab visibility changes
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (animationFrameId && !isAnimationPaused) {
+                cancelAnimationFrame(animationFrameId);
+                isAnimationPaused = true;
+                console.log("Animation paused (tab hidden)");
+            }
+        } else {
+            if (isAnimationPaused) {
+                isAnimationPaused = false;
+                clock.start(); // Reset clock to avoid time jump
+                animate();
+                console.log("Animation resumed (tab visible)");
+            }
+        }
+    });
+
     animate();
     
     const textureLoader = new THREE.TextureLoader();

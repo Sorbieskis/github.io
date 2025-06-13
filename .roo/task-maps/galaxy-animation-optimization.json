@@ -1,0 +1,49 @@
+{
+  "project": "High-Fidelity Galaxy Animation Performance Optimization",
+  "Phase_1_Renderer_Shader_Optimizations": {
+    "1.1_fine_tune_webgl_renderer_settings": {
+      "agent": "Three.js Optimization Specialist",
+      "dependencies": [],
+      "outputs": ["Modified galaxy-core.js with renderer settings"],
+      "validation": "Renderer instantiated with powerPreference:'high-performance' and antialias:false without visual degradation",
+      "human_checkpoint": true,
+      "scope": "Only modify renderer instantiation parameters in galaxy-core.js"
+    },
+    "1.2_optimize_shader_precision": {
+      "agent": "Shader Optimization Specialist",
+      "dependencies": [],
+      "outputs": ["Updated particle-shaders.js with precision directives"],
+      "validation": "Both shaders contain 'precision mediump float' declaration without rendering artifacts",
+      "human_checkpoint": true,
+      "scope": "Add precision declarations to existing shaders only"
+    }
+  },
+  "Phase_2_Dynamic_Performance_Management": {
+    "2.1_implement_smart_fps_throttling": {
+      "agent": "Performance Engineering Agent",
+      "dependencies": [],
+      "outputs": ["FPS throttling system in galaxy-core.js"],
+      "validation": "Animation smoothly transitions between 60FPS/24FPS based on scroll position without stuttering",
+      "human_checkpoint": true,
+      "scope": "Implement scroll-based FPS control without altering animation logic"
+    },
+    "2.2_pause_animation_when_tab_hidden": {
+      "agent": "Resource Optimization Agent",
+      "dependencies": ["2.1_implement_smart_fps_throttling"],
+      "outputs": ["Page Visibility integration in galaxy-core.js"],
+      "validation": "Zero GPU/CPU usage when tab is backgrounded; seamless resume when focused",
+      "human_checkpoint": false,
+      "scope": "Integrate Page Visibility API with existing animation loop"
+    }
+  },
+  "Phase_3_Final_Build_Verification": {
+    "3.1_centralize_tailwind_css_design_tokens": {
+      "agent": "CSS Optimization Specialist",
+      "dependencies": [],
+      "outputs": ["Refactored tailwind.config.js", "Optimized input.css"],
+      "validation": "All color references use centralized tokens with identical visual output",
+      "human_checkpoint": true,
+      "scope": "CSS token consolidation without layout/design changes"
+    }
+  }
+}

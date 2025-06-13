@@ -1,4 +1,5 @@
 export const particleVertexShader = `
+    precision mediump float;
     uniform float uTime;
     uniform float uSize;
     uniform float uScale;
@@ -37,6 +38,7 @@ export const particleVertexShader = `
 `;
 
 export const particleFragmentShader = `
+    precision mediump float;
     varying vec3 vColor;
     varying float vParticleOpacityFactor;
     varying float vFade;
